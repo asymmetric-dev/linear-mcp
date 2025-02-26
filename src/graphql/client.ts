@@ -1,29 +1,27 @@
 import { LinearClient } from '@linear/sdk';
 import { DocumentNode } from 'graphql';
-import { 
-  CreateIssueInput, 
-  CreateIssueResponse,
-  CreateIssuesResponse,
-  UpdateIssueInput,
-  UpdateIssuesResponse,
-  SearchIssuesInput,
-  SearchIssuesResponse,
-  DeleteIssueResponse,
-  Issue,
-  IssueBatchResponse
+import {
+    CreateIssueInput,
+    CreateIssueResponse,
+    DeleteIssueResponse,
+    IssueBatchResponse,
+    SearchIssuesInput,
+    SearchIssuesResponse,
+    UpdateIssueInput,
+    UpdateIssuesResponse
 } from '../features/issues/types/issue.types.js';
 import {
-  ProjectInput,
-  ProjectResponse,
-  SearchProjectsResponse
+    ProjectInput,
+    ProjectResponse,
+    SearchProjectsResponse
 } from '../features/projects/types/project.types.js';
 import {
-  TeamResponse,
-  LabelInput,
-  LabelResponse
+    LabelInput,
+    LabelResponse,
+    TeamResponse
 } from '../features/teams/types/team.types.js';
 import {
-  UserResponse
+    UserResponse
 } from '../features/users/types/user.types.js';
 
 export class LinearGraphQLClient {
@@ -54,14 +52,16 @@ export class LinearGraphQLClient {
 
   // Create single issue
   async createIssue(input: CreateIssueInput): Promise<CreateIssueResponse> {
-    const { CREATE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<CreateIssueResponse>(CREATE_ISSUES_MUTATION, { input: [input] });
+    const { CREATE_ISSUE_MUTATION } = await import('./mutations.js');
+    return this.execute<CreateIssueResponse>(CREATE_ISSUE_MUTATION, { input: input });
   }
 
   // Create multiple issues
-  async createIssues(issues: CreateIssueInput[]): Promise<CreateIssuesResponse> {
-    const { CREATE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<CreateIssuesResponse>(CREATE_ISSUES_MUTATION, { input: issues });
+  async createIssues(issues: CreateIssueInput[]): Promise<IssueBatchResponse> {
+    const { CREATE_BATCH_ISSUES } = await import('./mutations.js');
+    return this.execute<IssueBatchResponse>(CREATE_BATCH_ISSUES, {
+      input: { issues }
+    });
   }
 
   // Create a project

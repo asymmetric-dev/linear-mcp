@@ -1,21 +1,21 @@
+import { LinearAuth } from '../../../auth.js';
 import { BaseHandler } from '../../../core/handlers/base.handler.js';
 import { BaseToolResponse } from '../../../core/interfaces/tool-handler.interface.js';
-import { LinearAuth } from '../../../auth.js';
 import { LinearGraphQLClient } from '../../../graphql/client.js';
 import {
-  IssueHandlerMethods,
-  CreateIssueInput,
-  CreateIssuesInput,
-  BulkUpdateIssuesInput,
-  SearchIssuesInput,
-  DeleteIssueInput,
-  DeleteIssuesInput,
-  CreateIssueResponse,
-  CreateIssuesResponse,
-  UpdateIssuesResponse,
-  SearchIssuesResponse,
-  DeleteIssueResponse,
-  Issue
+    BulkUpdateIssuesInput,
+    CreateIssueInput,
+    CreateIssueResponse,
+    CreateIssuesInput,
+    DeleteIssueInput,
+    DeleteIssueResponse,
+    DeleteIssuesInput,
+    Issue,
+    IssueBatchResponse,
+    IssueHandlerMethods,
+    SearchIssuesInput,
+    SearchIssuesResponse,
+    UpdateIssuesResponse
 } from '../types/issue.types.js';
 
 /**
@@ -67,13 +67,13 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
         throw new Error('Issues parameter must be an array');
       }
 
-      const result = await client.createIssues(args.issues) as CreateIssuesResponse;
+      const result = await client.createIssues(args.issues) as IssueBatchResponse;
 
-      if (!result.issueCreate.success) {
+      if (!result.issueBatchCreate.success) {
         throw new Error('Failed to create issues');
       }
 
-      const createdIssues = result.issueCreate.issues as Issue[];
+      const createdIssues = result.issueBatchCreate.issues as Issue[];
 
       return this.createResponse(
         `Successfully created ${createdIssues.length} issues:\n` +
