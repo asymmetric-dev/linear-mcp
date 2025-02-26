@@ -8,9 +8,11 @@ import {
     SearchIssuesInput,
     SearchIssuesResponse,
     UpdateIssueInput,
+    UpdateIssueResponse,
     UpdateIssuesResponse
 } from '../features/issues/types/issue.types.js';
 import {
+    GetProjectResponse,
     ProjectInput,
     ProjectResponse,
     SearchProjectsResponse
@@ -106,18 +108,18 @@ export class LinearGraphQLClient {
   }
 
   // Update a single issue
-  async updateIssue(id: string, input: UpdateIssueInput): Promise<UpdateIssuesResponse> {
+  async updateIssue(id: string, input: UpdateIssueInput): Promise<UpdateIssueResponse> {
     const { UPDATE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<UpdateIssuesResponse>(UPDATE_ISSUES_MUTATION, {
-      ids: [id],
+    return this.execute<UpdateIssueResponse>(UPDATE_ISSUES_MUTATION, {
+      id,
       input,
     });
   }
 
   // Bulk update issues
   async updateIssues(ids: string[], input: UpdateIssueInput): Promise<UpdateIssuesResponse> {
-    const { UPDATE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<UpdateIssuesResponse>(UPDATE_ISSUES_MUTATION, { ids, input });
+    const { UPDATE_BATCH_ISSUES_MUTATION } = await import('./mutations.js');
+    return this.execute<UpdateIssuesResponse>(UPDATE_BATCH_ISSUES_MUTATION, { ids, input });
   }
 
   // Create multiple labels
@@ -155,9 +157,9 @@ export class LinearGraphQLClient {
   }
 
   // Get project info
-  async getProject(id: string): Promise<ProjectResponse> {
+  async getProject(id: string): Promise<GetProjectResponse> {
     const { GET_PROJECT_QUERY } = await import('./queries.js');
-    return this.execute<ProjectResponse>(GET_PROJECT_QUERY, { id });
+    return this.execute<GetProjectResponse>(GET_PROJECT_QUERY, { id });
   }
 
   // Search projects
@@ -169,12 +171,7 @@ export class LinearGraphQLClient {
   // Delete a single issue
   async deleteIssue(id: string): Promise<DeleteIssueResponse> {
     const { DELETE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<DeleteIssueResponse>(DELETE_ISSUES_MUTATION, { ids: [id] });
+    return this.execute<DeleteIssueResponse>(DELETE_ISSUES_MUTATION, { id });
   }
 
-  // Delete multiple issues
-  async deleteIssues(ids: string[]): Promise<DeleteIssueResponse> {
-    const { DELETE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<DeleteIssueResponse>(DELETE_ISSUES_MUTATION, { ids });
-  }
 }

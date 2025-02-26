@@ -100,11 +100,11 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
 
       const result = await client.updateIssues(args.issueIds, args.update) as UpdateIssuesResponse;
 
-      if (!result.issueUpdate.success) {
+      if (!result.issueBatchUpdate.success) {
         throw new Error('Failed to update issues');
       }
 
-      const updatedCount = result.issueUpdate.issues.length;
+      const updatedCount = result.issueBatchUpdate.issues.length;
 
       return this.createResponse(`Successfully updated ${updatedCount} issues`);
     } catch (error) {
@@ -170,32 +170,6 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
       return this.createResponse(`Successfully deleted issue ${args.id}`);
     } catch (error) {
       this.handleError(error, 'delete issue');
-    }
-  }
-
-  /**
-   * Deletes multiple issues in bulk.
-   */
-  async handleDeleteIssues(args: DeleteIssuesInput): Promise<BaseToolResponse> {
-    try {
-      const client = this.verifyAuth();
-      this.validateRequiredParams(args, ['ids']);
-
-      if (!Array.isArray(args.ids)) {
-        throw new Error('Ids parameter must be an array');
-      }
-
-      const result = await client.deleteIssues(args.ids) as DeleteIssueResponse;
-
-      if (!result.issueDelete.success) {
-        throw new Error('Failed to delete issues');
-      }
-
-      return this.createResponse(
-        `Successfully deleted ${args.ids.length} issues: ${args.ids.join(', ')}`
-      );
-    } catch (error) {
-      this.handleError(error, 'delete issues');
     }
   }
 }

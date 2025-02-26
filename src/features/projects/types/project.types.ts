@@ -33,14 +33,33 @@ export interface ProjectInput {
   state?: string;
 }
 
+export interface Team {
+  id: string;
+  name: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  teams: { nodes: Team[] };
+}
+
+export interface GetProjectResponse {
+  project: {
+    id: string;
+    name: string;
+    description: string;
+    url: string;
+    teams: { nodes: Team[] };
+  };
+}
+
 export interface ProjectResponse {
   projectCreate: {
     success: boolean;
-    project: {
-      id: string;
-      name: string;
-      url: string;
-    };
+    project: Project;
     lastSyncId: number;
   };
   issueBatchCreate?: {
@@ -57,6 +76,6 @@ export interface ProjectResponse {
 
 export interface SearchProjectsResponse {
   projects: {
-    nodes: Array<ProjectResponse['projectCreate']['project']>;
+    nodes: Array<Project>;
   };
 }

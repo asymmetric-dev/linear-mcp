@@ -52,14 +52,37 @@ export const CREATE_BATCH_ISSUES = gql`
 `;
 
 export const UPDATE_ISSUES_MUTATION = gql`
-  mutation UpdateIssues($ids: [String!]!, $input: IssueUpdateInput!) {
-    issueUpdate(ids: $ids, input: $input) {
+  mutation UpdateIssue($id: String!, $input: IssueUpdateInput!) {
+    issueUpdate(id: $id, input: $input) {
+      success
+      issue {
+        id
+        identifier
+        title
+        url
+        project {
+          name
+        }
+        state {
+          name
+        }
+      }
+    }
+  }
+`;
+
+export const UPDATE_BATCH_ISSUES_MUTATION = gql`
+  mutation UpdateIssues($ids: [UUID!]!, $input: IssueUpdateInput!) {
+    issueBatchUpdate(ids: $ids, input: $input) {
       success
       issues {
         id
         identifier
         title
         url
+        project {
+          name
+        }
         state {
           name
         }
@@ -69,8 +92,8 @@ export const UPDATE_ISSUES_MUTATION = gql`
 `;
 
 export const DELETE_ISSUES_MUTATION = gql`
-  mutation DeleteIssues($ids: [String!]!) {
-    issueDelete(ids: $ids) {
+  mutation DeleteIssues($id: String!) {
+    issueDelete(id: $id) {
       success
     }
   }
