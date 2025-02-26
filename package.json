@@ -10,6 +10,7 @@
     "test:coverage": "jest --coverage",
     "test:integration": "jest --config=jest.integration.config.js",
     "get-test-tokens": "node --loader ts-node/esm scripts/get-test-tokens.ts",
+    "get-test-info": "node --loader ts-node/esm scripts/get-team-project-info.ts",
     "test:oauth": "node --loader ts-node/esm scripts/test-oauth.ts",
     "build": "tsc && chmod +x build/index.js",
     "start": "node build/index.js",
