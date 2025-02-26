@@ -142,6 +142,8 @@ npm install
 npm test
 
 # Run integration tests (requires LINEAR_ACCESS_TOKEN)
+# Since project ID and team ID are needed, you need to first run
+npm run get-test-info
 npm run test:integration
 
 # Build the server
