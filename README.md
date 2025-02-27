@@ -76,6 +76,31 @@ The server supports two authentication methods:
    }
    ```
 
+### 5. Claude Desktop App Integration
+
+1. Open your Cline MCP settings file:
+
+   - macOS: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
+   - Windows: `$env:AppData\Claude\claude_desktop_config.json`
+   - Linux: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
+
+2. Add the Linear MCP server configuration:
+   ```json
+   {
+     "mcpServers": {
+       "linear": {
+         "command": "node",
+         "args": ["/path/to/linear-mcp/build/index.js"],
+         "env": {
+           "LINEAR_ACCESS_TOKEN": "your_personal_access_token"
+         },
+         "disabled": false,
+         "autoApprove": []
+       }
+     }
+   }
+   ```
+
 ## Available Actions
 
 The server currently supports the following operations:

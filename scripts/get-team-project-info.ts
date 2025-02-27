@@ -1,6 +1,3 @@
-#!/usr/bin/env node
-// @ts-check
-
 import { LinearAuth } from '../src/auth.js';
 import { LinearGraphQLClient } from '../src/graphql/client.js';
 import { config } from 'dotenv';

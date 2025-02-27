@@ -1,7 +1,5 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { LinearAuth } from '../auth';
-// Imported for types but not used directly
-// import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 // Mock fetch
 const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
