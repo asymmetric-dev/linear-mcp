@@ -130,6 +130,26 @@ export const GET_PROJECT_QUERY = gql`
           name
         }
       }
+      issues {
+        nodes {
+          id
+          title
+          updatedAt
+          createdAt
+          state {
+            name
+          }
+          assignee {
+            id
+            name
+          }
+          labels {
+            nodes {
+              name
+            }
+          }
+        }
+      }
     }
   }
 `;
