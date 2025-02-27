@@ -12,6 +12,7 @@ export interface CreateIssueInput {
   priority?: number;
   projectId?: string;
   stateId?: string;
+  labelIds?: string[];
 }
 
 export interface CreateIssuesInput {
@@ -34,20 +35,16 @@ export interface BulkUpdateIssuesInput {
 
 export interface SearchIssuesInput {
   query?: string;
-  filter?: {
-    project?: {
-      id?: {
-        eq?: string;
-      };
-    };
-  };
+  ids?: string[];
+  projectId?: string;
   teamIds?: string[];
   assigneeIds?: string[];
-  states?: string[];
+  stateIds?: string[];
   priority?: number;
   first?: number;
   after?: string;
   orderBy?: string;
+  labelIds?: string[];
 }
 
 export interface DeleteIssueInput {

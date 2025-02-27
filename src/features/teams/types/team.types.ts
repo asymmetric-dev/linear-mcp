@@ -21,18 +21,44 @@ export interface TeamResponse {
   };
 }
 
+export interface State {
+  id: string;
+  name: string;
+  team: Team;
+}
+
+export interface WorkflowStatesResponse {
+  workflowStates: {
+    nodes: State[];
+  };
+}
+
+export interface Label {
+  id: string;
+  name: string;
+  team: Team;
+}
+
+export interface IssueLabelResponse {
+  issueLabel: Label[];
+}
+
+export interface IssueLabelsResponse {
+  issueLabels: {
+    nodes: Label[];
+  };
+}
+
 export interface LabelInput {
   name: string;
   color?: string;
   teamId: string;
+  description?: string;
 }
 
 export interface LabelResponse {
-  labelCreate: {
+  issueLabelCreate: {
     success: boolean;
-    label: {
-      id: string;
-      name: string;
-    };
+    issueLabel: Label;
   };
 }
