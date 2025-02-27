@@ -19,10 +19,7 @@ export abstract class BaseHandler {
    */
   protected verifyAuth(): LinearGraphQLClient {
     if (!this.auth.isAuthenticated() || !this.graphqlClient) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
-        'Not authenticated. Call linear_auth first.'
-      );
+      throw new McpError(ErrorCode.InvalidRequest, 'Not authenticated. Call linear_auth first.');
     }
 
     if (this.auth.needsTokenRefresh()) {
@@ -69,11 +66,8 @@ export abstract class BaseHandler {
    * @param required Array of required parameter names
    * @throws {McpError} If any required parameters are missing
    */
-  protected validateRequiredParams<T>(
-    params: T,
-    required: Array<keyof T & string>
-  ): void {
-    const missing = required.filter(param => !params[param]);
+  protected validateRequiredParams<T>(params: T, required: Array<keyof T & string>): void {
+    const missing = required.filter((param) => !params[param]);
     if (missing.length > 0) {
       throw new McpError(
         ErrorCode.InvalidParams,

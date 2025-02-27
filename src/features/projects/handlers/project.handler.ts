@@ -39,24 +39,28 @@ export class ProjectHandler extends BaseHandler {
       this.validateRequiredParams(args, ['project', 'issues']);
 
       // Validate project input
-      if (!args.project.teamIds || !Array.isArray(args.project.teamIds) || args.project.teamIds.length === 0) {
+      if (
+        !args.project.teamIds ||
+        !Array.isArray(args.project.teamIds) ||
+        args.project.teamIds.length === 0
+      ) {
         throw new Error(
           'Project requires teamIds as an array with at least one team ID.\n' +
-          'Example:\n' +
-          '{\n' +
-          '  project: {\n' +
-          '    name: "Project Name",\n' +
-          '    teamIds: ["team-id-1"]\n' +
-          '  },\n' +
-          '  issues: [{ title: "Issue Title", teamId: "team-id-1" }]\n' +
-          '}'
+            'Example:\n' +
+            '{\n' +
+            '  project: {\n' +
+            '    name: "Project Name",\n' +
+            '    teamIds: ["team-id-1"]\n' +
+            '  },\n' +
+            '  issues: [{ title: "Issue Title", teamId: "team-id-1" }]\n' +
+            '}'
         );
       }
 
       if (!Array.isArray(args.issues)) {
         throw new Error(
           'Issues parameter must be an array of issue objects.\n' +
-          'Example: issues: [{ title: "Issue Title", teamId: "team-id-1" }]'
+            'Example: issues: [{ title: "Issue Title", teamId: "team-id-1" }]'
         );
       }
 
@@ -65,17 +69,17 @@ export class ProjectHandler extends BaseHandler {
         if (!issue.teamId) {
           throw new Error(
             `Issue at index ${index} is missing required teamId.\n` +
-            'Each issue must have a teamId that matches one of the project teamIds.'
+              'Each issue must have a teamId that matches one of the project teamIds.'
           );
         }
       });
 
-      const result = await client.createProjectWithIssues(
-        args.project,
-        args.issues
-      );
+      const result = await client.createProjectWithIssues(args.project, args.issues);
 
-      if (!result.projectCreate.success || (result.issueBatchCreate && !result.issueBatchCreate.success)) {
+      if (
+        !result.projectCreate.success ||
+        (result.issueBatchCreate && !result.issueBatchCreate.success)
+      ) {
         throw new Error('Failed to create project or issues');
       }
 
@@ -83,15 +87,15 @@ export class ProjectHandler extends BaseHandler {
       const issuesCreated = result.issueBatchCreate?.issues.length ?? 0;
 
       const response = [
-        `Successfully created project with issues`,
+        'Successfully created project with issues',
         `Project: ${project.name}`,
-        `Project URL: ${project.url}`
+        `Project URL: ${project.url}`,
       ];
 
       if (issuesCreated > 0) {
         response.push(`Issues created: ${issuesCreated}`);
         // Add details for each issue
-        result.issueBatchCreate?.issues.forEach(issue => {
+        result.issueBatchCreate?.issues.forEach((issue) => {
           response.push(`- ${issue.identifier}: ${issue.title} (${issue.url})`);
         });
       }
@@ -127,7 +131,7 @@ export class ProjectHandler extends BaseHandler {
       this.validateRequiredParams(args, ['name']);
 
       const result = await client.searchProjects({
-        name: { eq: args.name }
+        name: { eq: args.name },
       });
 
       return this.createJsonResponse(result);

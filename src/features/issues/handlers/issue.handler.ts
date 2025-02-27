@@ -1,21 +1,20 @@
+import { LinearAuth } from '../../../auth.js';
 import { BaseHandler } from '../../../core/handlers/base.handler.js';
 import { BaseToolResponse } from '../../../core/interfaces/tool-handler.interface.js';
-import { LinearAuth } from '../../../auth.js';
 import { LinearGraphQLClient } from '../../../graphql/client.js';
 import {
-  IssueHandlerMethods,
-  CreateIssueInput,
-  CreateIssuesInput,
   BulkUpdateIssuesInput,
-  SearchIssuesInput,
-  DeleteIssueInput,
-  DeleteIssuesInput,
+  CreateIssueInput,
   CreateIssueResponse,
-  CreateIssuesResponse,
-  UpdateIssuesResponse,
-  SearchIssuesResponse,
+  CreateIssuesInput,
+  DeleteIssueInput,
   DeleteIssueResponse,
-  Issue
+  Issue,
+  IssueBatchResponse,
+  IssueHandlerMethods,
+  SearchIssuesInput,
+  SearchIssuesResponse,
+  UpdateIssuesResponse,
 } from '../types/issue.types.js';
 
 /**
@@ -35,7 +34,7 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
       const client = this.verifyAuth();
       this.validateRequiredParams(args, ['title', 'description', 'teamId']);
 
-      const result = await client.createIssue(args) as CreateIssueResponse;
+      const result = (await client.createIssue(args)) as CreateIssueResponse;
 
       if (!result.issueCreate.success || !result.issueCreate.issue) {
         throw new Error('Failed to create issue');
@@ -44,11 +43,11 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
       const issue = result.issueCreate.issue;
 
       return this.createResponse(
-        `Successfully created issue\n` +
-        `Issue: ${issue.identifier}\n` +
-        `Title: ${issue.title}\n` +
-        `URL: ${issue.url}\n` +
-        `Project: ${issue.project ? issue.project.name : 'None'}`
+        'Successfully created issue\n' +
+          `Issue: ${issue.identifier}\n` +
+          `Title: ${issue.title}\n` +
+          `URL: ${issue.url}\n` +
+          `Project: ${issue.project ? issue.project.name : 'None'}`
       );
     } catch (error) {
       this.handleError(error, 'create issue');
@@ -67,19 +66,19 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
         throw new Error('Issues parameter must be an array');
       }
 
-      const result = await client.createIssues(args.issues) as CreateIssuesResponse;
+      const result = (await client.createIssues(args.issues)) as IssueBatchResponse;
 
-      if (!result.issueCreate.success) {
+      if (!result.issueBatchCreate.success) {
         throw new Error('Failed to create issues');
       }
 
-      const createdIssues = result.issueCreate.issues as Issue[];
+      const createdIssues = result.issueBatchCreate.issues as Issue[];
 
       return this.createResponse(
         `Successfully created ${createdIssues.length} issues:\n` +
-        createdIssues.map(issue => 
-          `- ${issue.identifier}: ${issue.title}\n  URL: ${issue.url}`
-        ).join('\n')
+          createdIssues
+            .map((issue) => `- ${issue.identifier}: ${issue.title}\n  URL: ${issue.url}`)
+            .join('\n')
       );
     } catch (error) {
       this.handleError(error, 'create issues');
@@ -98,13 +97,16 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
         throw new Error('IssueIds parameter must be an array');
       }
 
-      const result = await client.updateIssues(args.issueIds, args.update) as UpdateIssuesResponse;
+      const result = (await client.updateIssues(
+        args.issueIds,
+        args.update
+      )) as UpdateIssuesResponse;
 
-      if (!result.issueUpdate.success) {
+      if (!result.issueBatchUpdate.success) {
         throw new Error('Failed to update issues');
       }
 
-      const updatedCount = result.issueUpdate.issues.length;
+      const updatedCount = result.issueBatchUpdate.issues.length;
 
       return this.createResponse(`Successfully updated ${updatedCount} issues`);
     } catch (error) {
@@ -120,7 +122,7 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
       const client = this.verifyAuth();
 
       const filter: Record<string, unknown> = {};
-      
+
       if (args.query) {
         filter.search = args.query;
       }
@@ -140,12 +142,12 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
         filter.priority = { eq: args.priority };
       }
 
-      const result = await client.searchIssues(
+      const result = (await client.searchIssues(
         filter,
         args.first || 50,
         args.after,
         args.orderBy || 'updatedAt'
-      ) as SearchIssuesResponse;
+      )) as SearchIssuesResponse;
 
       return this.createJsonResponse(result);
     } catch (error) {
@@ -161,7 +163,7 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
       const client = this.verifyAuth();
       this.validateRequiredParams(args, ['id']);
 
-      const result = await client.deleteIssue(args.id) as DeleteIssueResponse;
+      const result = (await client.deleteIssue(args.id)) as DeleteIssueResponse;
 
       if (!result.issueDelete.success) {
         throw new Error('Failed to delete issue');
@@ -170,32 +172,6 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
       return this.createResponse(`Successfully deleted issue ${args.id}`);
     } catch (error) {
       this.handleError(error, 'delete issue');
-    }
-  }
-
-  /**
-   * Deletes multiple issues in bulk.
-   */
-  async handleDeleteIssues(args: DeleteIssuesInput): Promise<BaseToolResponse> {
-    try {
-      const client = this.verifyAuth();
-      this.validateRequiredParams(args, ['ids']);
-
-      if (!Array.isArray(args.ids)) {
-        throw new Error('Ids parameter must be an array');
-      }
-
-      const result = await client.deleteIssues(args.ids) as DeleteIssueResponse;
-
-      if (!result.issueDelete.success) {
-        throw new Error('Failed to delete issues');
-      }
-
-      return this.createResponse(
-        `Successfully deleted ${args.ids.length} issues: ${args.ids.join(', ')}`
-      );
-    } catch (error) {
-      this.handleError(error, 'delete issues');
     }
   }
 }

@@ -1,6 +1,5 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { LinearAuth } from '../auth';
-import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 // Mock fetch
 const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
@@ -24,7 +23,7 @@ describe('LinearAuth', () => {
           type: 'oauth',
           clientId: 'test-client-id',
           clientSecret: 'test-client-secret',
-          redirectUri: 'http://localhost:3000/callback'
+          redirectUri: 'http://localhost:3000/callback',
         });
       }).not.toThrow();
     });
@@ -33,7 +32,7 @@ describe('LinearAuth', () => {
       expect(() => {
         auth.initialize({
           type: 'pat',
-          accessToken: 'test-access-token'
+          accessToken: 'test-access-token',
         });
       }).not.toThrow();
 
@@ -58,7 +57,7 @@ describe('LinearAuth', () => {
         type: 'oauth',
         clientId: 'test-client-id',
         clientSecret: 'test-client-secret',
-        redirectUri: 'http://localhost:3000/callback'
+        redirectUri: 'http://localhost:3000/callback',
       });
 
       const url = auth.getAuthorizationUrl();
@@ -70,7 +69,7 @@ describe('LinearAuth', () => {
     it('should throw error when called with PAT config', () => {
       auth.initialize({
         type: 'pat',
-        accessToken: 'test-access-token'
+        accessToken: 'test-access-token',
       });
 
       expect(() => {
@@ -91,18 +90,20 @@ describe('LinearAuth', () => {
         type: 'oauth',
         clientId: 'test-client-id',
         clientSecret: 'test-client-secret',
-        redirectUri: 'http://localhost:3000/callback'
+        redirectUri: 'http://localhost:3000/callback',
       });
 
       // Mock the token exchange
-      mockFetch.mockResolvedValueOnce(new Response(
-        JSON.stringify({
-          access_token: 'test-access-token',
-          refresh_token: 'test-refresh-token',
-          expires_in: 3600
-        }),
-        { status: 200 }
-      ));
+      mockFetch.mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            access_token: 'test-access-token',
+            refresh_token: 'test-refresh-token',
+            expires_in: 3600,
+          }),
+          { status: 200 }
+        )
+      );
 
       await expect(auth.handleCallback('valid-code')).resolves.not.toThrow();
       expect(auth.isAuthenticated()).toBe(true);
@@ -111,7 +112,7 @@ describe('LinearAuth', () => {
     it('should throw error when called with PAT config', async () => {
       auth.initialize({
         type: 'pat',
-        accessToken: 'test-access-token'
+        accessToken: 'test-access-token',
       });
 
       await expect(auth.handleCallback('valid-code')).rejects.toThrow();
@@ -122,16 +123,18 @@ describe('LinearAuth', () => {
         type: 'oauth',
         clientId: 'test-client-id',
         clientSecret: 'test-client-secret',
-        redirectUri: 'http://localhost:3000/callback'
+        redirectUri: 'http://localhost:3000/callback',
       });
 
       // Mock failed token exchange
-      mockFetch.mockResolvedValueOnce(new Response(
-        JSON.stringify({
-          error: 'invalid_grant'
-        }),
-        { status: 400 }
-      ));
+      mockFetch.mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            error: 'invalid_grant',
+          }),
+          { status: 400 }
+        )
+      );
 
       await expect(auth.handleCallback('invalid-code')).rejects.toThrow();
     });
@@ -143,14 +146,14 @@ describe('LinearAuth', () => {
         type: 'oauth',
         clientId: 'test-client-id',
         clientSecret: 'test-client-secret',
-        redirectUri: 'http://localhost:3000/callback'
+        redirectUri: 'http://localhost:3000/callback',
       });
 
       // Set expired token
       auth.setTokenData({
         accessToken: 'test-access-token',
         refreshToken: 'test-refresh-token',
-        expiresAt: Date.now() - 1000
+        expiresAt: Date.now() - 1000,
       });
 
       expect(auth.needsTokenRefresh()).toBe(true);
@@ -161,14 +164,14 @@ describe('LinearAuth', () => {
         type: 'oauth',
         clientId: 'test-client-id',
         clientSecret: 'test-client-secret',
-        redirectUri: 'http://localhost:3000/callback'
+        redirectUri: 'http://localhost:3000/callback',
       });
 
       // Set valid token
       auth.setTokenData({
         accessToken: 'test-access-token',
         refreshToken: 'test-refresh-token',
-        expiresAt: Date.now() + 3600000 // 1 hour from now
+        expiresAt: Date.now() + 3600000, // 1 hour from now
       });
 
       expect(auth.needsTokenRefresh()).toBe(false);
@@ -177,7 +180,7 @@ describe('LinearAuth', () => {
     it('should return false for PAT', () => {
       auth.initialize({
         type: 'pat',
-        accessToken: 'test-access-token'
+        accessToken: 'test-access-token',
       });
 
       expect(auth.needsTokenRefresh()).toBe(false);
@@ -190,25 +193,27 @@ describe('LinearAuth', () => {
         type: 'oauth',
         clientId: 'test-client-id',
         clientSecret: 'test-client-secret',
-        redirectUri: 'http://localhost:3000/callback'
+        redirectUri: 'http://localhost:3000/callback',
       });
 
       // Set initial token data
       auth.setTokenData({
         accessToken: 'test-access-token',
         refreshToken: 'test-refresh-token',
-        expiresAt: Date.now() - 1000 // Expired
+        expiresAt: Date.now() - 1000, // Expired
       });
 
       // Mock successful token refresh
-      mockFetch.mockResolvedValueOnce(new Response(
-        JSON.stringify({
-          access_token: 'new-access-token',
-          refresh_token: 'new-refresh-token',
-          expires_in: 3600
-        }),
-        { status: 200 }
-      ));
+      mockFetch.mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            access_token: 'new-access-token',
+            refresh_token: 'new-refresh-token',
+            expires_in: 3600,
+          }),
+          { status: 200 }
+        )
+      );
 
       await expect(auth.refreshAccessToken()).resolves.not.toThrow();
     });
@@ -218,23 +223,25 @@ describe('LinearAuth', () => {
         type: 'oauth',
         clientId: 'test-client-id',
         clientSecret: 'test-client-secret',
-        redirectUri: 'http://localhost:3000/callback'
+        redirectUri: 'http://localhost:3000/callback',
       });
 
       // Set initial token data
       auth.setTokenData({
         accessToken: 'test-access-token',
         refreshToken: 'test-refresh-token',
-        expiresAt: Date.now() - 1000 // Expired
+        expiresAt: Date.now() - 1000, // Expired
       });
 
       // Mock failed token refresh
-      mockFetch.mockResolvedValueOnce(new Response(
-        JSON.stringify({
-          error: 'invalid_grant'
-        }),
-        { status: 400 }
-      ));
+      mockFetch.mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            error: 'invalid_grant',
+          }),
+          { status: 400 }
+        )
+      );
 
       await expect(auth.refreshAccessToken()).rejects.toThrow();
     });
@@ -242,7 +249,7 @@ describe('LinearAuth', () => {
     it('should throw error when called with PAT config', async () => {
       auth.initialize({
         type: 'pat',
-        accessToken: 'test-access-token'
+        accessToken: 'test-access-token',
       });
 
       await expect(auth.refreshAccessToken()).rejects.toThrow();

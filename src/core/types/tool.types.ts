@@ -70,6 +70,16 @@ export const toolSchemas = {
           description: 'Issue priority (0-4)',
           optional: true,
         },
+        projectId: {
+          type: 'string',
+          description: 'Project ID',
+          optional: true,
+        },
+        stateId: {
+          type: 'string',
+          description: 'Issue State ID',
+          optional: true,
+        },
         createAsUser: {
           type: 'string',
           description: 'Name to display for the created issue',
@@ -87,7 +97,8 @@ export const toolSchemas = {
 
   linear_create_project_with_issues: {
     name: 'linear_create_project_with_issues',
-    description: 'Create a new project with associated issues. Note: Project requires teamIds (array) not teamId (single value).',
+    description:
+      'Create a new project with associated issues. Note: Project requires teamIds (array) not teamId (single value).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -107,8 +118,9 @@ export const toolSchemas = {
               items: {
                 type: 'string',
               },
-              description: 'Array of team IDs this project belongs to (Required). Use linear_get_teams to get available team IDs.',
-              minItems: 1
+              description:
+                'Array of team IDs this project belongs to (Required). Use linear_get_teams to get available team IDs.',
+              minItems: 1,
             },
           },
           required: ['name', 'teamIds'],
@@ -130,6 +142,11 @@ export const toolSchemas = {
                 type: 'string',
                 description: 'Team ID (must match one of the project teamIds)',
               },
+              stateId: {
+                type: 'string',
+                description: 'Issue State ID',
+                optional: true,
+              },
             },
             required: ['title', 'description', 'teamId'],
           },
@@ -140,45 +157,45 @@ export const toolSchemas = {
     },
     examples: [
       {
-        description: "Create a project with a single team and issue",
+        description: 'Create a project with a single team and issue',
         value: {
           project: {
-            name: "Q1 Planning",
-            description: "Q1 2025 Planning Project",
-            teamIds: ["team-id-1"]
+            name: 'Q1 Planning',
+            description: 'Q1 2025 Planning Project',
+            teamIds: ['team-id-1'],
           },
           issues: [
             {
-              title: "Project Setup",
-              description: "Initial project setup tasks",
-              teamId: "team-id-1"
-            }
-          ]
-        }
+              title: 'Project Setup',
+              description: 'Initial project setup tasks',
+              teamId: 'team-id-1',
+            },
+          ],
+        },
       },
       {
-        description: "Create a project with multiple teams",
+        description: 'Create a project with multiple teams',
         value: {
           project: {
-            name: "Cross-team Initiative",
-            description: "Project spanning multiple teams",
-            teamIds: ["team-id-1", "team-id-2"]
+            name: 'Cross-team Initiative',
+            description: 'Project spanning multiple teams',
+            teamIds: ['team-id-1', 'team-id-2'],
           },
           issues: [
             {
-              title: "Team 1 Tasks",
-              description: "Tasks for team 1",
-              teamId: "team-id-1"
+              title: 'Team 1 Tasks',
+              description: 'Tasks for team 1',
+              teamId: 'team-id-1',
             },
             {
-              title: "Team 2 Tasks",
-              description: "Tasks for team 2",
-              teamId: "team-id-2"
-            }
-          ]
-        }
-      }
-    ]
+              title: 'Team 2 Tasks',
+              description: 'Tasks for team 2',
+              teamId: 'team-id-2',
+            },
+          ],
+        },
+      },
+    ],
   },
 
   linear_bulk_update_issues: {
@@ -311,24 +328,6 @@ export const toolSchemas = {
     },
   },
 
-  linear_delete_issues: {
-    name: 'linear_delete_issues',
-    description: 'Delete multiple issues',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        ids: {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-          description: 'List of issue identifiers to delete',
-        },
-      },
-      required: ['ids'],
-    },
-  },
-
   linear_get_project: {
     name: 'linear_get_project',
     description: 'Get project information',
@@ -382,9 +381,24 @@ export const toolSchemas = {
                 type: 'string',
                 description: 'Team ID',
               },
+              assigneeId: {
+                type: 'string',
+                description: 'Assignee user ID',
+                optional: true,
+              },
+              priority: {
+                type: 'number',
+                description: 'Issue priority (0-4)',
+                optional: true,
+              },
               projectId: {
                 type: 'string',
                 description: 'Project ID',
+                optional: true,
+              },
+              stateId: {
+                type: 'string',
+                description: 'Issue State ID',
                 optional: true,
               },
               labelIds: {
@@ -394,7 +408,7 @@ export const toolSchemas = {
                 },
                 description: 'Label IDs to apply',
                 optional: true,
-              }
+              },
             },
             required: ['title', 'description', 'teamId'],
           },

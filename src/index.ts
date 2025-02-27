@@ -36,22 +36,22 @@ class LinearServer {
     );
 
     this.auth = new LinearAuth();
-    
+
     // Initialize with PAT if available
     const accessToken = process.env.LINEAR_ACCESS_TOKEN;
     if (accessToken) {
       this.auth.initialize({
         type: 'pat',
-        accessToken
+        accessToken,
       });
       this.graphqlClient = new LinearGraphQLClient(this.auth.getClient());
     }
-    
+
     // Initialize handler factory
     this.handlerFactory = new HandlerFactory(this.auth, this.graphqlClient);
-    
+
     this.setupRequestHandlers();
-    
+
     // Error handling
     this.server.onerror = (error) => console.error('[MCP Error]', error);
     process.on('SIGINT', async () => {
@@ -74,10 +74,7 @@ class LinearServer {
         return await (handler as any)[method](request.params.arguments);
       } catch (error) {
         if (error instanceof Error && error.message.startsWith('No handler found')) {
-          throw new McpError(
-            ErrorCode.MethodNotFound,
-            `Unknown tool: ${request.params.name}`
-          );
+          throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
         }
         throw error;
       }

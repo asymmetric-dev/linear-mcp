@@ -45,10 +45,12 @@ export class HandlerFactory {
       linear_bulk_update_issues: { handler: this.issueHandler, method: 'handleBulkUpdateIssues' },
       linear_search_issues: { handler: this.issueHandler, method: 'handleSearchIssues' },
       linear_delete_issue: { handler: this.issueHandler, method: 'handleDeleteIssue' },
-      linear_delete_issues: { handler: this.issueHandler, method: 'handleDeleteIssues' },
 
       // Project tools
-      linear_create_project_with_issues: { handler: this.projectHandler, method: 'handleCreateProjectWithIssues' },
+      linear_create_project_with_issues: {
+        handler: this.projectHandler,
+        method: 'handleCreateProjectWithIssues',
+      },
       linear_get_project: { handler: this.projectHandler, method: 'handleGetProject' },
       linear_search_projects: { handler: this.projectHandler, method: 'handleSearchProjects' },
 

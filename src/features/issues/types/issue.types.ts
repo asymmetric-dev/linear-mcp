@@ -11,6 +11,7 @@ export interface CreateIssueInput {
   assigneeId?: string;
   priority?: number;
   projectId?: string;
+  stateId?: string;
 }
 
 export interface CreateIssuesInput {
@@ -53,10 +54,6 @@ export interface DeleteIssueInput {
   id: string;
 }
 
-export interface DeleteIssuesInput {
-  ids: string[];
-}
-
 /**
  * Response types for issue operations
  */
@@ -67,6 +64,9 @@ export interface Issue {
   title: string;
   url: string;
   project?: {
+    name: string;
+  };
+  state?: {
     name: string;
   };
 }
@@ -93,8 +93,15 @@ export interface IssueBatchResponse {
   };
 }
 
-export interface UpdateIssuesResponse {
+export interface UpdateIssueResponse {
   issueUpdate: {
+    success: boolean;
+    issue: Issue;
+  };
+}
+
+export interface UpdateIssuesResponse {
+  issueBatchUpdate: {
     success: boolean;
     issues: Issue[];
   };
@@ -126,5 +133,4 @@ export interface IssueHandlerMethods {
   handleBulkUpdateIssues(args: BulkUpdateIssuesInput): Promise<BaseToolResponse>;
   handleSearchIssues(args: SearchIssuesInput): Promise<BaseToolResponse>;
   handleDeleteIssue(args: DeleteIssueInput): Promise<BaseToolResponse>;
-  handleDeleteIssues(args: DeleteIssuesInput): Promise<BaseToolResponse>;
 }

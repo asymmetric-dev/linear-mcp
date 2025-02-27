@@ -12,7 +12,7 @@ export interface Team {
   id: string;
   name: string;
   key: string;
-  states: TeamState[];
+  states: { nodes: TeamState[] };
 }
 
 export interface TeamResponse {

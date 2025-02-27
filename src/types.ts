@@ -1,4 +1,4 @@
-import { Issue, Team } from '@linear/sdk';
+import { Team } from '@linear/sdk';
 
 export interface IssuePayload {
   id: string;

@@ -10,10 +10,16 @@ async function main() {
   // Check if we're using PAT or OAuth
   if (process.env.LINEAR_ACCESS_TOKEN) {
     await testPat();
-  } else if (process.env.LINEAR_CLIENT_ID && process.env.LINEAR_CLIENT_SECRET && process.env.LINEAR_REDIRECT_URI) {
+  } else if (
+    process.env.LINEAR_CLIENT_ID &&
+    process.env.LINEAR_CLIENT_SECRET &&
+    process.env.LINEAR_REDIRECT_URI
+  ) {
     await testOAuth();
   } else {
-    console.error('ERROR: Either LINEAR_ACCESS_TOKEN or OAuth credentials (LINEAR_CLIENT_ID, LINEAR_CLIENT_SECRET, LINEAR_REDIRECT_URI) are required');
+    console.error(
+      'ERROR: Either LINEAR_ACCESS_TOKEN or OAuth credentials (LINEAR_CLIENT_ID, LINEAR_CLIENT_SECRET, LINEAR_REDIRECT_URI) are required'
+    );
     process.exit(1);
   }
 }
@@ -22,7 +28,7 @@ async function testPat() {
   const auth = new LinearAuth();
   auth.initialize({
     type: 'pat',
-    accessToken: process.env.LINEAR_ACCESS_TOKEN!
+    accessToken: process.env.LINEAR_ACCESS_TOKEN!,
   });
 
   try {
@@ -47,7 +53,7 @@ async function testOAuth() {
     type: 'oauth',
     clientId: process.env.LINEAR_CLIENT_ID!,
     clientSecret: process.env.LINEAR_CLIENT_SECRET!,
-    redirectUri: process.env.LINEAR_REDIRECT_URI!
+    redirectUri: process.env.LINEAR_REDIRECT_URI!,
   });
 
   // Handle OAuth callback
@@ -69,17 +75,17 @@ async function testOAuth() {
     try {
       // Exchange code for tokens
       await auth.handleCallback(code);
-      
+
       // Get user info to verify authentication
       const client = auth.getClient();
       const viewer = await client.viewer;
-      
+
       console.log('\nOAuth Authentication successful!');
       console.log(`Connected as: ${viewer.name} (${viewer.email})`);
       console.log('\nTest Credentials:\n');
       console.log(`LINEAR_AUTH_CODE=${code}`);
       console.log(`LINEAR_REDIRECT_URI=${process.env.LINEAR_REDIRECT_URI}`);
-      
+
       // Get refresh token from auth instance
       const tokenData = (auth as any).tokenData;
       if (tokenData?.refreshToken) {
@@ -95,8 +101,8 @@ async function testOAuth() {
 
   // Start server and open auth URL
   const server = app.listen(port, () => {
-    console.log(`\nStarting OAuth flow...\n`);
-    
+    console.log('\nStarting OAuth flow...\n');
+
     // Get and open authorization URL
     const authUrl = auth.getAuthorizationUrl();
     console.log(`Opening: ${authUrl}\n`);

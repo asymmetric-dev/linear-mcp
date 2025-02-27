@@ -1,29 +1,24 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { LinearGraphQLClient } from '../graphql/client';
 import { LinearClient } from '@linear/sdk';
-import { 
-  CreateIssueInput, 
+import {
+  CreateIssueInput,
   CreateIssueResponse,
-  CreateIssuesResponse,
+  // CreateIssuesResponse, - Not used directly
   UpdateIssueInput,
   UpdateIssuesResponse,
   SearchIssuesInput,
   SearchIssuesResponse,
-  DeleteIssueResponse
+  // DeleteIssueResponse, - Not used directly
+  IssueBatchResponse,
 } from '../features/issues/types/issue.types';
 import {
   ProjectInput,
-  ProjectResponse,
-  SearchProjectsResponse
+  // ProjectResponse, - Not used directly
+  // SearchProjectsResponse, - Not used directly
 } from '../features/projects/types/project.types';
-import {
-  TeamResponse,
-  LabelInput,
-  LabelResponse
-} from '../features/teams/types/team.types';
-import {
-  UserResponse
-} from '../features/users/types/user.types';
+import { TeamResponse, LabelInput, LabelResponse } from '../features/teams/types/team.types';
+import { UserResponse } from '../features/users/types/user.types';
 
 jest.mock('@linear/sdk');
 
@@ -32,18 +27,20 @@ type GraphQLResponse<T> = {
   data: T;
 };
 
-describe('LinearGraphQLClient', () => {
+describe.only('LinearGraphQLClient', () => {
   let graphqlClient: LinearGraphQLClient;
   let linearClient: LinearClient;
-  let mockRawRequest: jest.MockedFunction<(query: string, variables?: Record<string, unknown>) => Promise<GraphQLResponse<unknown>>>;
+  let mockRawRequest: jest.MockedFunction<
+    (query: string, variables?: Record<string, unknown>) => Promise<GraphQLResponse<unknown>>
+  >;
 
   beforeEach(() => {
     mockRawRequest = jest.fn();
     // Mock the Linear client's GraphQL client
     linearClient = {
       client: {
-        rawRequest: mockRawRequest
-      }
+        rawRequest: mockRawRequest,
+      },
     } as unknown as LinearClient;
 
     // Clear mocks
@@ -59,18 +56,18 @@ describe('LinearGraphQLClient', () => {
           issues: {
             pageInfo: {
               hasNextPage: false,
-              endCursor: null
+              endCursor: null,
             },
             nodes: [
               {
                 id: 'issue-1',
                 identifier: 'TEST-1',
                 title: 'Test Issue 1',
-                url: 'https://linear.app/test/issue/TEST-1'
-              }
-            ]
-          }
-        }
+                url: 'https://linear.app/test/issue/TEST-1',
+              },
+            ],
+          },
+        },
       };
 
       mockRawRequest.mockResolvedValueOnce(mockResponse);
@@ -79,11 +76,11 @@ describe('LinearGraphQLClient', () => {
         filter: {
           project: {
             id: {
-              eq: 'project-1'
-            }
-          }
+              eq: 'project-1',
+            },
+          },
         },
-        first: 1
+        first: 1,
       };
 
       const result: SearchIssuesResponse = await graphqlClient.searchIssues(
@@ -102,15 +99,15 @@ describe('LinearGraphQLClient', () => {
         filter: {
           project: {
             id: {
-              eq: 'project-1'
-            }
-          }
-        }
+              eq: 'project-1',
+            },
+          },
+        },
       };
 
-      await expect(
-        graphqlClient.searchIssues(searchInput.filter)
-      ).rejects.toThrow('GraphQL operation failed: Search failed');
+      await expect(graphqlClient.searchIssues(searchInput.filter)).rejects.toThrow(
+        'GraphQL operation failed: Search failed'
+      );
     });
   });
 
@@ -124,10 +121,10 @@ describe('LinearGraphQLClient', () => {
               id: 'issue-1',
               identifier: 'TEST-1',
               title: 'New Issue',
-              url: 'https://linear.app/test/issue/TEST-1'
-            }
-          }
-        }
+              url: 'https://linear.app/test/issue/TEST-1',
+            },
+          },
+        },
       };
 
       mockRawRequest.mockResolvedValueOnce(mockResponse);
@@ -135,16 +132,16 @@ describe('LinearGraphQLClient', () => {
       const input: CreateIssueInput = {
         title: 'New Issue',
         description: 'Description',
-        teamId: 'team-1'
+        teamId: 'team-1',
       };
-      
+
       const result: CreateIssueResponse = await graphqlClient.createIssue(input);
 
       // Verify single mutation call with array input
       expect(mockRawRequest).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          input: [input]
+          input: input,
         })
       );
 
@@ -158,12 +155,12 @@ describe('LinearGraphQLClient', () => {
       const input: CreateIssueInput = {
         title: 'New Issue',
         description: 'Description',
-        teamId: 'team-1'
+        teamId: 'team-1',
       };
 
-      await expect(
-        graphqlClient.createIssue(input)
-      ).rejects.toThrow('GraphQL operation failed: Creation failed');
+      await expect(graphqlClient.createIssue(input)).rejects.toThrow(
+        'GraphQL operation failed: Creation failed'
+      );
     });
   });
 
@@ -177,18 +174,18 @@ describe('LinearGraphQLClient', () => {
               project: {
                 id: 'project-1',
                 name: 'New Project',
-                url: 'https://linear.app/test/project/1'
+                url: 'https://linear.app/test/project/1',
               },
-              lastSyncId: 123
-            }
-          }
+              lastSyncId: 123,
+            },
+          },
         };
 
         mockRawRequest.mockResolvedValueOnce(mockResponse);
 
         const projectInput: ProjectInput = {
           name: 'New Project',
-          teamIds: ['team-1']
+          teamIds: ['team-1'],
         };
 
         const result = await graphqlClient.createProject(projectInput);
@@ -209,11 +206,11 @@ describe('LinearGraphQLClient', () => {
               project: {
                 id: 'project-1',
                 name: 'New Project',
-                url: 'https://linear.app/test/project/1'
+                url: 'https://linear.app/test/project/1',
               },
-              lastSyncId: 123
-            }
-          }
+              lastSyncId: 123,
+            },
+          },
         };
 
         const issueMockResponse = {
@@ -225,12 +222,12 @@ describe('LinearGraphQLClient', () => {
                   id: 'issue-1',
                   identifier: 'TEST-1',
                   title: 'Project Issue 1',
-                  url: 'https://linear.app/test/issue/TEST-1'
-                }
+                  url: 'https://linear.app/test/issue/TEST-1',
+                },
               ],
-              lastSyncId: 124
-            }
-          }
+              lastSyncId: 124,
+            },
+          },
         };
 
         mockRawRequest
@@ -239,23 +236,20 @@ describe('LinearGraphQLClient', () => {
 
         const projectInput: ProjectInput = {
           name: 'New Project',
-          teamIds: ['team-1']
+          teamIds: ['team-1'],
         };
 
         const issueInput: CreateIssueInput = {
           title: 'Project Issue 1',
           description: 'Description 1',
-          teamId: 'team-1'
+          teamId: 'team-1',
         };
 
-        const result = await graphqlClient.createProjectWithIssues(
-          projectInput,
-          [issueInput]
-        );
+        const result = await graphqlClient.createProjectWithIssues(projectInput, [issueInput]);
 
         expect(result).toEqual({
           projectCreate: projectMockResponse.data.projectCreate,
-          issueBatchCreate: issueMockResponse.data.issueBatchCreate
+          issueBatchCreate: issueMockResponse.data.issueBatchCreate,
         });
 
         // Verify project creation call
@@ -269,8 +263,8 @@ describe('LinearGraphQLClient', () => {
           expect.any(String),
           expect.objectContaining({
             input: {
-              issues: [{ ...issueInput, projectId: 'project-1' }]
-            }
+              issues: [{ ...issueInput, projectId: 'project-1' }],
+            },
           })
         );
       });
@@ -281,22 +275,22 @@ describe('LinearGraphQLClient', () => {
             projectCreate: {
               success: false,
               project: null,
-              lastSyncId: 123
-            }
-          }
+              lastSyncId: 123,
+            },
+          },
         };
 
         mockRawRequest.mockResolvedValueOnce(errorResponse);
 
         const projectInput: ProjectInput = {
           name: 'New Project',
-          teamIds: ['team-1']
+          teamIds: ['team-1'],
         };
 
         const issueInput: CreateIssueInput = {
           title: 'Project Issue 1',
           description: 'Description 1',
-          teamId: 'team-1'
+          teamId: 'team-1',
         };
 
         await expect(
@@ -312,11 +306,11 @@ describe('LinearGraphQLClient', () => {
               project: {
                 id: 'project-1',
                 name: 'New Project',
-                url: 'https://linear.app/test/project/1'
+                url: 'https://linear.app/test/project/1',
               },
-              lastSyncId: 123
-            }
-          }
+              lastSyncId: 123,
+            },
+          },
         };
 
         const errorResponse = {
@@ -324,24 +318,22 @@ describe('LinearGraphQLClient', () => {
             issueBatchCreate: {
               success: false,
               issues: [],
-              lastSyncId: 124
-            }
-          }
+              lastSyncId: 124,
+            },
+          },
         };
 
-        mockRawRequest
-          .mockResolvedValueOnce(projectResponse)
-          .mockResolvedValueOnce(errorResponse);
+        mockRawRequest.mockResolvedValueOnce(projectResponse).mockResolvedValueOnce(errorResponse);
 
         const projectInput: ProjectInput = {
           name: 'New Project',
-          teamIds: ['team-1']
+          teamIds: ['team-1'],
         };
 
         const issueInput: CreateIssueInput = {
           title: 'Project Issue 1',
           description: 'Description 1',
-          teamId: 'team-1'
+          teamId: 'team-1',
         };
 
         await expect(
@@ -362,17 +354,17 @@ describe('LinearGraphQLClient', () => {
                 id: 'issue-1',
                 identifier: 'TEST-1',
                 title: 'Issue 1',
-                url: 'https://linear.app/test/issue/TEST-1'
+                url: 'https://linear.app/test/issue/TEST-1',
               },
               {
                 id: 'issue-2',
                 identifier: 'TEST-2',
                 title: 'Issue 2',
-                url: 'https://linear.app/test/issue/TEST-2'
-              }
-            ]
-          }
-        }
+                url: 'https://linear.app/test/issue/TEST-2',
+              },
+            ],
+          },
+        },
       };
 
       mockRawRequest.mockResolvedValueOnce(mockResponse);
@@ -381,16 +373,16 @@ describe('LinearGraphQLClient', () => {
         {
           title: 'Issue 1',
           description: 'Description 1',
-          teamId: 'team-1'
+          teamId: 'team-1',
         },
         {
           title: 'Issue 2',
           description: 'Description 2',
-          teamId: 'team-1'
-        }
+          teamId: 'team-1',
+        },
       ];
 
-      const result: CreateIssuesResponse = await graphqlClient.createIssues(issues);
+      const result: IssueBatchResponse = await graphqlClient.createIssues(issues);
 
       expect(result).toEqual(mockResponse.data);
       // Verify single mutation call
@@ -398,7 +390,7 @@ describe('LinearGraphQLClient', () => {
       expect(mockRawRequest).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          input: issues
+          input: { issues },
         })
       );
     });
@@ -413,17 +405,17 @@ describe('LinearGraphQLClient', () => {
                 id: 'issue-1',
                 identifier: 'TEST-1',
                 title: 'Updated Issue 1',
-                url: 'https://linear.app/test/issue/TEST-1'
+                url: 'https://linear.app/test/issue/TEST-1',
               },
               {
                 id: 'issue-2',
                 identifier: 'TEST-2',
                 title: 'Updated Issue 2',
-                url: 'https://linear.app/test/issue/TEST-2'
-              }
-            ]
-          }
-        }
+                url: 'https://linear.app/test/issue/TEST-2',
+              },
+            ],
+          },
+        },
       };
 
       mockRawRequest.mockResolvedValueOnce(mockResponse);
@@ -439,7 +431,7 @@ describe('LinearGraphQLClient', () => {
         expect.any(String),
         expect.objectContaining({
           ids,
-          input: updateInput
+          input: updateInput,
         })
       );
     });
@@ -448,33 +440,8 @@ describe('LinearGraphQLClient', () => {
       mockRawRequest.mockRejectedValueOnce(new Error('Update failed'));
 
       const updateInput: UpdateIssueInput = { stateId: 'state-2' };
-      await expect(
-        graphqlClient.updateIssues(['issue-1'], updateInput)
-      ).rejects.toThrow('GraphQL operation failed: Update failed');
-    });
-
-    it('should delete multiple issues with a single mutation', async () => {
-      const mockResponse = {
-        data: {
-          issueDelete: {
-            success: true
-          }
-        }
-      };
-
-      mockRawRequest.mockResolvedValueOnce(mockResponse);
-
-      const ids = ['issue-1', 'issue-2'];
-      const result: DeleteIssueResponse = await graphqlClient.deleteIssues(ids);
-
-      expect(result).toEqual(mockResponse.data);
-      // Verify single mutation call
-      expect(mockRawRequest).toHaveBeenCalledTimes(1);
-      expect(mockRawRequest).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          ids
-        })
+      await expect(graphqlClient.updateIssues(['issue-1'], updateInput)).rejects.toThrow(
+        'GraphQL operation failed: Update failed'
       );
     });
   });
@@ -493,13 +460,13 @@ describe('LinearGraphQLClient', () => {
                   {
                     id: 'state-1',
                     name: 'Todo',
-                    type: 'unstarted'
-                  }
-                ]
-              }
-            ]
-          }
-        }
+                    type: 'unstarted',
+                  },
+                ],
+              },
+            ],
+          },
+        },
       };
 
       mockRawRequest.mockResolvedValueOnce(mockResponse);
@@ -526,9 +493,9 @@ describe('LinearGraphQLClient', () => {
           viewer: {
             id: 'user-1',
             name: 'Test User',
-            email: 'test@example.com'
-          }
-        }
+            email: 'test@example.com',
+          },
+        },
       };
 
       mockRawRequest.mockResolvedValueOnce(mockResponse);
@@ -556,10 +523,10 @@ describe('LinearGraphQLClient', () => {
             success: true,
             label: {
               id: 'label-1',
-              name: 'bug'
-            }
-          }
-        }
+              name: 'bug',
+            },
+          },
+        },
       };
 
       mockRawRequest.mockResolvedValueOnce(mockResponse);
@@ -567,7 +534,7 @@ describe('LinearGraphQLClient', () => {
       const labelInput: LabelInput = {
         name: 'bug',
         color: '#FF0000',
-        teamId: 'team-1'
+        teamId: 'team-1',
       };
 
       const result: LabelResponse = await graphqlClient.createIssueLabels([labelInput]);
@@ -581,12 +548,12 @@ describe('LinearGraphQLClient', () => {
 
       const labelInput: LabelInput = {
         name: 'bug',
-        teamId: 'team-1'
+        teamId: 'team-1',
       };
 
-      await expect(
-        graphqlClient.createIssueLabels([labelInput])
-      ).rejects.toThrow('GraphQL operation failed: Label creation failed');
+      await expect(graphqlClient.createIssueLabels([labelInput])).rejects.toThrow(
+        'GraphQL operation failed: Label creation failed'
+      );
     });
   });
 });

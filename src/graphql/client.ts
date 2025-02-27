@@ -1,30 +1,24 @@
 import { LinearClient } from '@linear/sdk';
 import { DocumentNode } from 'graphql';
-import { 
-  CreateIssueInput, 
+import {
+  CreateIssueInput,
   CreateIssueResponse,
-  CreateIssuesResponse,
-  UpdateIssueInput,
-  UpdateIssuesResponse,
+  DeleteIssueResponse,
+  IssueBatchResponse,
   SearchIssuesInput,
   SearchIssuesResponse,
-  DeleteIssueResponse,
-  Issue,
-  IssueBatchResponse
+  UpdateIssueInput,
+  UpdateIssueResponse,
+  UpdateIssuesResponse,
 } from '../features/issues/types/issue.types.js';
 import {
+  GetProjectResponse,
   ProjectInput,
   ProjectResponse,
-  SearchProjectsResponse
+  SearchProjectsResponse,
 } from '../features/projects/types/project.types.js';
-import {
-  TeamResponse,
-  LabelInput,
-  LabelResponse
-} from '../features/teams/types/team.types.js';
-import {
-  UserResponse
-} from '../features/users/types/user.types.js';
+import { LabelInput, LabelResponse, TeamResponse } from '../features/teams/types/team.types.js';
+import { UserResponse } from '../features/users/types/user.types.js';
 
 export class LinearGraphQLClient {
   private linearClient: LinearClient;
@@ -39,10 +33,7 @@ export class LinearGraphQLClient {
   ): Promise<T> {
     const graphQLClient = this.linearClient.client;
     try {
-      const response = await graphQLClient.rawRequest(
-        document.loc?.source.body || '',
-        variables
-      );
+      const response = await graphQLClient.rawRequest(document.loc?.source.body || '', variables);
       return response.data as T;
     } catch (error) {
       if (error instanceof Error) {
@@ -54,14 +45,16 @@ export class LinearGraphQLClient {
 
   // Create single issue
   async createIssue(input: CreateIssueInput): Promise<CreateIssueResponse> {
-    const { CREATE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<CreateIssueResponse>(CREATE_ISSUES_MUTATION, { input: [input] });
+    const { CREATE_ISSUE_MUTATION } = await import('./mutations.js');
+    return this.execute<CreateIssueResponse>(CREATE_ISSUE_MUTATION, { input: input });
   }
 
   // Create multiple issues
-  async createIssues(issues: CreateIssueInput[]): Promise<CreateIssuesResponse> {
-    const { CREATE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<CreateIssuesResponse>(CREATE_ISSUES_MUTATION, { input: issues });
+  async createIssues(issues: CreateIssueInput[]): Promise<IssueBatchResponse> {
+    const { CREATE_BATCH_ISSUES } = await import('./mutations.js');
+    return this.execute<IssueBatchResponse>(CREATE_BATCH_ISSUES, {
+      input: { issues },
+    });
   }
 
   // Create a project
@@ -74,23 +67,26 @@ export class LinearGraphQLClient {
   async createBatchIssues(issues: CreateIssueInput[]): Promise<IssueBatchResponse> {
     const { CREATE_BATCH_ISSUES } = await import('./mutations.js');
     return this.execute<IssueBatchResponse>(CREATE_BATCH_ISSUES, {
-      input: { issues }
+      input: { issues },
     });
   }
 
   // Helper method to create a project with associated issues
-  async createProjectWithIssues(projectInput: ProjectInput, issues: CreateIssueInput[]): Promise<ProjectResponse> {
+  async createProjectWithIssues(
+    projectInput: ProjectInput,
+    issues: CreateIssueInput[]
+  ): Promise<ProjectResponse> {
     // Create project first
     const projectResult = await this.createProject(projectInput);
-    
+
     if (!projectResult.projectCreate.success) {
       throw new Error('Failed to create project');
     }
 
     // Then create issues with project ID
-    const issuesWithProject = issues.map(issue => ({
+    const issuesWithProject = issues.map((issue) => ({
       ...issue,
-      projectId: projectResult.projectCreate.project.id
+      projectId: projectResult.projectCreate.project.id,
     }));
 
     const issuesResult = await this.createBatchIssues(issuesWithProject);
@@ -101,23 +97,23 @@ export class LinearGraphQLClient {
 
     return {
       projectCreate: projectResult.projectCreate,
-      issueBatchCreate: issuesResult.issueBatchCreate
+      issueBatchCreate: issuesResult.issueBatchCreate,
     };
   }
 
   // Update a single issue
-  async updateIssue(id: string, input: UpdateIssueInput): Promise<UpdateIssuesResponse> {
+  async updateIssue(id: string, input: UpdateIssueInput): Promise<UpdateIssueResponse> {
     const { UPDATE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<UpdateIssuesResponse>(UPDATE_ISSUES_MUTATION, {
-      ids: [id],
+    return this.execute<UpdateIssueResponse>(UPDATE_ISSUES_MUTATION, {
+      id,
       input,
     });
   }
 
   // Bulk update issues
   async updateIssues(ids: string[], input: UpdateIssueInput): Promise<UpdateIssuesResponse> {
-    const { UPDATE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<UpdateIssuesResponse>(UPDATE_ISSUES_MUTATION, { ids, input });
+    const { UPDATE_BATCH_ISSUES_MUTATION } = await import('./mutations.js');
+    return this.execute<UpdateIssuesResponse>(UPDATE_BATCH_ISSUES_MUTATION, { ids, input });
   }
 
   // Create multiple labels
@@ -128,10 +124,10 @@ export class LinearGraphQLClient {
 
   // Search issues with pagination
   async searchIssues(
-    filter: SearchIssuesInput['filter'], 
-    first: number = 50, 
-    after?: string, 
-    orderBy: string = "updatedAt"
+    filter: SearchIssuesInput['filter'],
+    first = 50,
+    after?: string,
+    orderBy = 'updatedAt'
   ): Promise<SearchIssuesResponse> {
     const { SEARCH_ISSUES_QUERY } = await import('./queries.js');
     return this.execute<SearchIssuesResponse>(SEARCH_ISSUES_QUERY, {
@@ -155,9 +151,9 @@ export class LinearGraphQLClient {
   }
 
   // Get project info
-  async getProject(id: string): Promise<ProjectResponse> {
+  async getProject(id: string): Promise<GetProjectResponse> {
     const { GET_PROJECT_QUERY } = await import('./queries.js');
-    return this.execute<ProjectResponse>(GET_PROJECT_QUERY, { id });
+    return this.execute<GetProjectResponse>(GET_PROJECT_QUERY, { id });
   }
 
   // Search projects
@@ -169,12 +165,6 @@ export class LinearGraphQLClient {
   // Delete a single issue
   async deleteIssue(id: string): Promise<DeleteIssueResponse> {
     const { DELETE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<DeleteIssueResponse>(DELETE_ISSUES_MUTATION, { ids: [id] });
-  }
-
-  // Delete multiple issues
-  async deleteIssues(ids: string[]): Promise<DeleteIssueResponse> {
-    const { DELETE_ISSUES_MUTATION } = await import('./mutations.js');
-    return this.execute<DeleteIssueResponse>(DELETE_ISSUES_MUTATION, { ids });
+    return this.execute<DeleteIssueResponse>(DELETE_ISSUES_MUTATION, { id });
   }
 }
