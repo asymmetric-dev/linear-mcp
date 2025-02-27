@@ -9,7 +9,6 @@ import {
     CreateIssuesInput,
     DeleteIssueInput,
     DeleteIssueResponse,
-    DeleteIssuesInput,
     Issue,
     IssueBatchResponse,
     IssueHandlerMethods,

@@ -54,10 +54,6 @@ export interface DeleteIssueInput {
   id: string;
 }
 
-export interface DeleteIssuesInput {
-  ids: string[];
-}
-
 /**
  * Response types for issue operations
  */

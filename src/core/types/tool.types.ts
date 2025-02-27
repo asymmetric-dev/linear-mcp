@@ -75,6 +75,11 @@ export const toolSchemas = {
           description: 'Project ID',
           optional: true,
         },
+        stateId: {
+          type: 'string',
+          description: 'Issue State ID',
+          optional: true,
+        },
         createAsUser: {
           type: 'string',
           description: 'Name to display for the created issue',
@@ -134,6 +139,11 @@ export const toolSchemas = {
               teamId: {
                 type: 'string',
                 description: 'Team ID (must match one of the project teamIds)',
+              },
+              stateId: {
+                type: 'string',
+                description: 'Issue State ID',
+                optional: true,
               },
             },
             required: ['title', 'description', 'teamId'],
@@ -316,24 +326,6 @@ export const toolSchemas = {
     },
   },
 
-  linear_delete_issues: {
-    name: 'linear_delete_issues',
-    description: 'Delete multiple issues',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        ids: {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-          description: 'List of issue identifiers to delete',
-        },
-      },
-      required: ['ids'],
-    },
-  },
-
   linear_get_project: {
     name: 'linear_get_project',
     description: 'Get project information',
@@ -400,6 +392,11 @@ export const toolSchemas = {
               projectId: {
                 type: 'string',
                 description: 'Project ID',
+                optional: true,
+              },
+              stateId: {
+                type: 'string',
+                description: 'Issue State ID',
                 optional: true,
               },
               labelIds: {

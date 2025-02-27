@@ -92,7 +92,7 @@ export const UPDATE_BATCH_ISSUES_MUTATION = gql`
 `;
 
 export const DELETE_ISSUES_MUTATION = gql`
-  mutation DeleteIssues($id: String!) {
+  mutation DeleteIssue($id: String!) {
     issueDelete(id: $id) {
       success
     }
