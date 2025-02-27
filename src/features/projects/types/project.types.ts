@@ -45,7 +45,7 @@ export interface Issue {
   createdAt: Date;
   state: { name: string };
   assignee?: { id: string; name: string };
-  labels: { nodes: [{ name: string }] };
+  labels?: { nodes: Array<{ name: string }> };
 }
 
 export interface Project {

@@ -18,7 +18,6 @@ import {
   SearchProjectsResponse,
 } from '../features/projects/types/project.types.js';
 import {
-  IssueLabelResponse,
   IssueLabelsResponse,
   Label,
   LabelInput,
@@ -282,9 +281,9 @@ export class LinearGraphQLClient {
   }
 
   // Search projects
-  async searchProjects(filter: { name?: { eq: string } }): Promise<SearchProjectsResponse> {
+  async searchProjects(term: string): Promise<SearchProjectsResponse> {
     const { SEARCH_PROJECTS_QUERY } = await import('./queries.js');
-    return this.execute<SearchProjectsResponse>(SEARCH_PROJECTS_QUERY, { filter });
+    return this.execute<SearchProjectsResponse>(SEARCH_PROJECTS_QUERY, { term });
   }
 
   // Delete a single issue

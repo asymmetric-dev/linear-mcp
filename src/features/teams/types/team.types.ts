@@ -11,8 +11,8 @@ export interface TeamState {
 export interface Team {
   id: string;
   name: string;
-  key: string;
-  states: { nodes: TeamState[] };
+  key?: string;
+  states?: { nodes: TeamState[] };
 }
 
 export interface TeamResponse {

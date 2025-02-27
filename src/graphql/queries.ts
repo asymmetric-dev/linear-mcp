@@ -142,8 +142,8 @@ export const GET_USER_QUERY = gql`
 `;
 
 export const SEARCH_PROJECTS_QUERY = gql`
-  query SearchProjects($filter: ProjectFilter) {
-    projects(filter: $filter) {
+  query SearchProjects($term: String!) {
+    searchProjects(term: $term) {
       nodes {
         id
         name

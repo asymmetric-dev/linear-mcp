@@ -40,11 +40,11 @@ export interface SearchIssuesInput {
   teamIds?: string[];
   assigneeIds?: string[];
   stateIds?: string[];
+  labelIds?: string[];
   priority?: number;
   first?: number;
   after?: string;
   orderBy?: string;
-  labelIds?: string[];
 }
 
 export interface DeleteIssueInput {
