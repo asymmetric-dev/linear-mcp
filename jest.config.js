@@ -20,16 +20,12 @@ export default {
     '/build/',
     '\\.d\\.ts$',
     '/__tests__/config/',
-    '\\.integration\\.test\\.ts$'
+    '\\.integration\\.test\\.ts$',
   ],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/config/jest.setup.ts'],
   setupFiles: ['dotenv/config'], // Load .env file before tests
   moduleFileExtensions: ['ts', 'js', 'json'],
   clearMocks: true,
   resetMocks: true,
-  collectCoverageFrom: [
-    'src/**/*.{ts,js}',
-    '!src/**/*.d.ts',
-    '!src/__tests__/**/*'
-  ]
+  collectCoverageFrom: ['src/**/*.{ts,js}', '!src/**/*.d.ts', '!src/__tests__/**/*'],
 };

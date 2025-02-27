@@ -3,17 +3,17 @@ import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 /**
  * Solution Attempts:
- * 
+ *
  * 1. OAuth Flow with Browser (Initial Attempt)
  * - Used browser redirect and local server for OAuth flow
  * - Issues: Browser extensions interfering, CORS issues
  * - Status: Failed - Browser extensions and CORS blocking requests
- * 
+ *
  * 2. Personal Access Token (Current Attempt)
  * - Using PAT for initial integration tests
  * - Simpler approach without browser interaction
  * - Status: Working - Successfully authenticates and makes API calls
- * 
+ *
  * 3. Direct OAuth Token Exchange (Current Attempt)
  * - Using form-urlencoded content type as required by Linear
  * - Status: In Progress - Testing token exchange
@@ -46,14 +46,14 @@ export class LinearAuth {
   private tokenData?: TokenData;
   private linearClient?: LinearClient;
 
-  constructor() {}
+  // No configuration needed at construction time
+  constructor() {
+    /* empty constructor */
+  }
 
   public getAuthorizationUrl(): string {
     if (!this.config || this.config.type !== 'oauth') {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
-        'OAuth config not initialized'
-      );
+      throw new McpError(ErrorCode.InvalidRequest, 'OAuth config not initialized');
     }
 
     const params = new URLSearchParams({
@@ -71,10 +71,7 @@ export class LinearAuth {
 
   public async handleCallback(code: string): Promise<void> {
     if (!this.config || this.config.type !== 'oauth') {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
-        'OAuth config not initialized'
-      );
+      throw new McpError(ErrorCode.InvalidRequest, 'OAuth config not initialized');
     }
 
     try {
@@ -84,16 +81,16 @@ export class LinearAuth {
         client_secret: this.config.clientSecret,
         redirect_uri: this.config.redirectUri,
         code,
-        access_type: 'offline'
+        access_type: 'offline',
       });
 
       const response = await fetch(`${LinearAuth.OAUTH_TOKEN_URL}/oauth/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: params.toString()
+        body: params.toString(),
       });
 
       if (!response.ok) {
@@ -132,16 +129,16 @@ export class LinearAuth {
         grant_type: 'refresh_token',
         client_id: this.config.clientId,
         client_secret: this.config.clientSecret,
-        refresh_token: this.tokenData.refreshToken
+        refresh_token: this.tokenData.refreshToken,
       });
 
       const response = await fetch(`${LinearAuth.OAUTH_TOKEN_URL}/oauth/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: params.toString()
+        body: params.toString(),
       });
 
       if (!response.ok) {
@@ -192,10 +189,7 @@ export class LinearAuth {
 
   public getClient(): LinearClient {
     if (!this.linearClient) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
-        'Linear client not initialized'
-      );
+      throw new McpError(ErrorCode.InvalidRequest, 'Linear client not initialized');
     }
     return this.linearClient;
   }

@@ -68,7 +68,7 @@ export interface Issue {
   };
   state?: {
     name: string;
-  }
+  };
 }
 
 export interface CreateIssueResponse {

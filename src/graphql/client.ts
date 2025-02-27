@@ -1,30 +1,24 @@
 import { LinearClient } from '@linear/sdk';
 import { DocumentNode } from 'graphql';
 import {
-    CreateIssueInput,
-    CreateIssueResponse,
-    DeleteIssueResponse,
-    IssueBatchResponse,
-    SearchIssuesInput,
-    SearchIssuesResponse,
-    UpdateIssueInput,
-    UpdateIssueResponse,
-    UpdateIssuesResponse
+  CreateIssueInput,
+  CreateIssueResponse,
+  DeleteIssueResponse,
+  IssueBatchResponse,
+  SearchIssuesInput,
+  SearchIssuesResponse,
+  UpdateIssueInput,
+  UpdateIssueResponse,
+  UpdateIssuesResponse,
 } from '../features/issues/types/issue.types.js';
 import {
-    GetProjectResponse,
-    ProjectInput,
-    ProjectResponse,
-    SearchProjectsResponse
+  GetProjectResponse,
+  ProjectInput,
+  ProjectResponse,
+  SearchProjectsResponse,
 } from '../features/projects/types/project.types.js';
-import {
-    LabelInput,
-    LabelResponse,
-    TeamResponse
-} from '../features/teams/types/team.types.js';
-import {
-    UserResponse
-} from '../features/users/types/user.types.js';
+import { LabelInput, LabelResponse, TeamResponse } from '../features/teams/types/team.types.js';
+import { UserResponse } from '../features/users/types/user.types.js';
 
 export class LinearGraphQLClient {
   private linearClient: LinearClient;
@@ -39,10 +33,7 @@ export class LinearGraphQLClient {
   ): Promise<T> {
     const graphQLClient = this.linearClient.client;
     try {
-      const response = await graphQLClient.rawRequest(
-        document.loc?.source.body || '',
-        variables
-      );
+      const response = await graphQLClient.rawRequest(document.loc?.source.body || '', variables);
       return response.data as T;
     } catch (error) {
       if (error instanceof Error) {
@@ -62,7 +53,7 @@ export class LinearGraphQLClient {
   async createIssues(issues: CreateIssueInput[]): Promise<IssueBatchResponse> {
     const { CREATE_BATCH_ISSUES } = await import('./mutations.js');
     return this.execute<IssueBatchResponse>(CREATE_BATCH_ISSUES, {
-      input: { issues }
+      input: { issues },
     });
   }
 
@@ -76,23 +67,26 @@ export class LinearGraphQLClient {
   async createBatchIssues(issues: CreateIssueInput[]): Promise<IssueBatchResponse> {
     const { CREATE_BATCH_ISSUES } = await import('./mutations.js');
     return this.execute<IssueBatchResponse>(CREATE_BATCH_ISSUES, {
-      input: { issues }
+      input: { issues },
     });
   }
 
   // Helper method to create a project with associated issues
-  async createProjectWithIssues(projectInput: ProjectInput, issues: CreateIssueInput[]): Promise<ProjectResponse> {
+  async createProjectWithIssues(
+    projectInput: ProjectInput,
+    issues: CreateIssueInput[]
+  ): Promise<ProjectResponse> {
     // Create project first
     const projectResult = await this.createProject(projectInput);
-    
+
     if (!projectResult.projectCreate.success) {
       throw new Error('Failed to create project');
     }
 
     // Then create issues with project ID
-    const issuesWithProject = issues.map(issue => ({
+    const issuesWithProject = issues.map((issue) => ({
       ...issue,
-      projectId: projectResult.projectCreate.project.id
+      projectId: projectResult.projectCreate.project.id,
     }));
 
     const issuesResult = await this.createBatchIssues(issuesWithProject);
@@ -103,7 +97,7 @@ export class LinearGraphQLClient {
 
     return {
       projectCreate: projectResult.projectCreate,
-      issueBatchCreate: issuesResult.issueBatchCreate
+      issueBatchCreate: issuesResult.issueBatchCreate,
     };
   }
 
@@ -130,10 +124,10 @@ export class LinearGraphQLClient {
 
   // Search issues with pagination
   async searchIssues(
-    filter: SearchIssuesInput['filter'], 
-    first: number = 50, 
-    after?: string, 
-    orderBy: string = "updatedAt"
+    filter: SearchIssuesInput['filter'],
+    first = 50,
+    after?: string,
+    orderBy = 'updatedAt'
   ): Promise<SearchIssuesResponse> {
     const { SEARCH_ISSUES_QUERY } = await import('./queries.js');
     return this.execute<SearchIssuesResponse>(SEARCH_ISSUES_QUERY, {
@@ -173,5 +167,4 @@ export class LinearGraphQLClient {
     const { DELETE_ISSUES_MUTATION } = await import('./mutations.js');
     return this.execute<DeleteIssueResponse>(DELETE_ISSUES_MUTATION, { id });
   }
-
 }

@@ -15,7 +15,7 @@ export class TeamHandler extends BaseHandler {
   /**
    * Gets information about all teams, including their states and labels.
    */
-  async handleGetTeams(args: any): Promise<BaseToolResponse> {
+  async handleGetTeams(_args: any): Promise<BaseToolResponse> {
     try {
       const client = this.verifyAuth();
 

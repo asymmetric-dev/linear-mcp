@@ -18,5 +18,5 @@ export default {
   setupFiles: ['dotenv/config'], // Load .env file before tests
   moduleFileExtensions: ['ts', 'js', 'json'],
   clearMocks: true,
-  resetMocks: true
+  resetMocks: true,
 };

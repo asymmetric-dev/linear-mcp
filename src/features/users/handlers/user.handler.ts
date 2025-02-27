@@ -15,7 +15,7 @@ export class UserHandler extends BaseHandler {
   /**
    * Gets information about the currently authenticated user.
    */
-  async handleGetUser(args: any): Promise<BaseToolResponse> {
+  async handleGetUser(_args: any): Promise<BaseToolResponse> {
     try {
       const client = this.verifyAuth();
 

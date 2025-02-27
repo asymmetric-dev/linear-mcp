@@ -1,12 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
-import { config } from "dotenv";
-import { LinearAuth } from "../auth";
-import {
-  CreateIssueInput,
-  UpdateIssueInput,
-} from "../features/issues/types/issue.types";
-import { ProjectInput } from "../features/projects/types/project.types";
-import { LinearGraphQLClient } from "../graphql/client";
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import { config } from 'dotenv';
+import { LinearAuth } from '../auth';
+import { CreateIssueInput, UpdateIssueInput } from '../features/issues/types/issue.types';
+import { ProjectInput } from '../features/projects/types/project.types';
+import { LinearGraphQLClient } from '../graphql/client';
 
 // Load environment variables from .env file
 config();
@@ -25,16 +22,16 @@ const hasAuth = Boolean(LINEAR_ACCESS_TOKEN);
 const hasTeamAndProject = Boolean(teamId && projectId);
 
 // Only run tests if we have authentication
-(hasAuth ? describe : describe.skip)("Linear API Client Integration", () => {
+(hasAuth ? describe : describe.skip)('Linear API Client Integration', () => {
   beforeAll(() => {
     if (!LINEAR_ACCESS_TOKEN) {
-      throw new Error("Error: API token not found in environment variables");
+      throw new Error('Error: API token not found in environment variables');
     }
 
     // Initialize Linear client
     const auth = new LinearAuth();
     auth.initialize({
-      type: "pat",
+      type: 'pat',
       accessToken: LINEAR_ACCESS_TOKEN,
     });
 
@@ -45,14 +42,12 @@ const hasTeamAndProject = Boolean(teamId && projectId);
   afterAll(async () => {
     // Delete test issues
     if (createdIssueIds.length > 0) {
-      await Promise.all(
-        createdIssueIds.map((id) => linearClient.deleteIssue(id)),
-      );
+      await Promise.all(createdIssueIds.map((id) => linearClient.deleteIssue(id)));
     }
   });
 
-  describe("Authentication and User Information", () => {
-    it("should get current user information", async () => {
+  describe('Authentication and User Information', () => {
+    it('should get current user information', async () => {
       const result = await linearClient.getCurrentUser();
 
       expect(result).toBeDefined();
@@ -61,7 +56,7 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       expect(result.viewer.email).toBeDefined();
     });
 
-    it("should get teams information", async () => {
+    it('should get teams information', async () => {
       const result = await linearClient.getTeams();
 
       expect(result).toBeDefined();
@@ -72,17 +67,16 @@ const hasTeamAndProject = Boolean(teamId && projectId);
   });
 
   // Project Operations tests - only run if we have team and project IDs
-  (hasTeamAndProject ? describe : describe.skip)("Project Operations", () => {
+  (hasTeamAndProject ? describe : describe.skip)('Project Operations', () => {
     let testProjectId: string;
     let testProjectName: string;
 
-    it("should create a new project", async () => {
+    it('should create a new project', async () => {
       testProjectName = `Test Project ${new Date().toISOString()}`;
       const projectInput: ProjectInput = {
         name: testProjectName,
         teamIds: [teamId!],
-        description:
-          "This is a test project created for Jest integration tests",
+        description: 'This is a test project created for Jest integration tests',
       };
 
       const result = await linearClient.createProject(projectInput);
@@ -95,7 +89,7 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       testProjectId = result.projectCreate.project.id;
     });
 
-    it("should get project information", async () => {
+    it('should get project information', async () => {
       const result = await linearClient.getProject(testProjectId);
 
       expect(result).toBeDefined();
@@ -104,7 +98,7 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       expect(result.project.description).toBeDefined();
     });
 
-    it("should search for projects by name", async () => {
+    it('should search for projects by name', async () => {
       const result = await linearClient.searchProjects({
         name: { eq: testProjectName },
       });
@@ -118,14 +112,14 @@ const hasTeamAndProject = Boolean(teamId && projectId);
   });
 
   // Issue Operations tests - only run if we have team and project IDs
-  (hasTeamAndProject ? describe : describe.skip)("Issue Operations", () => {
+  (hasTeamAndProject ? describe : describe.skip)('Issue Operations', () => {
     let singleIssueId: string;
-    let bulkIssueIds: string[] = [];
+    const bulkIssueIds: string[] = [];
 
-    it("should create a single issue", async () => {
+    it('should create a single issue', async () => {
       const issueInput: CreateIssueInput = {
         title: `Test issue created at ${new Date().toISOString()}`,
-        description: "This is a test issue created by Jest integration tests",
+        description: 'This is a test issue created by Jest integration tests',
         teamId: teamId!,
         projectId: projectId!,
         priority: 2,
@@ -148,18 +142,18 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       createdIssueIds.push(singleIssueId);
     });
 
-    it("should create multiple issues in bulk", async () => {
+    it('should create multiple issues in bulk', async () => {
       const bulkIssues = [
         {
           title: `Bulk test issue 1 (${new Date().toISOString()})`,
-          description: "This is bulk test issue 1",
+          description: 'This is bulk test issue 1',
           teamId: teamId!,
           projectId: projectId!,
           priority: 1,
         },
         {
           title: `Bulk test issue 2 (${new Date().toISOString()})`,
-          description: "This is bulk test issue 2",
+          description: 'This is bulk test issue 2',
           teamId: teamId!,
           projectId: projectId!,
           priority: 3,
@@ -185,10 +179,10 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       });
     });
 
-    it("should update a single issue", async () => {
+    it('should update a single issue', async () => {
       const updateInput: UpdateIssueInput = {
         title: `Updated title at ${new Date().toISOString()}`,
-        description: "This description was updated by Jest tests",
+        description: 'This description was updated by Jest tests',
         priority: 4,
       };
 
@@ -200,7 +194,7 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       expect(result.issueUpdate.issue.title).toBe(updateInput.title);
     });
 
-    it("should update multiple issues in bulk", async () => {
+    it('should update multiple issues in bulk', async () => {
       const updateInput = {
         priority: 2,
         description: `Bulk updated at ${new Date().toISOString()}`,
@@ -213,12 +207,12 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       expect(result.issueBatchUpdate.issues.length).toBe(bulkIssueIds.length);
     });
 
-    it("should search for issues in a project", async () => {
+    it('should search for issues in a project', async () => {
       const result = await linearClient.searchIssues(
         { project: { id: { eq: projectId } } },
         10,
         undefined,
-        "createdAt",
+        'createdAt'
       );
 
       expect(result).toBeDefined();
@@ -227,7 +221,7 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       expect(result.issues.pageInfo).toBeDefined();
     });
 
-    it("should delete an issue", async () => {
+    it('should delete an issue', async () => {
       // Take one issue ID from our created issues for deletion test
       const issueIdToDelete = createdIssueIds.pop();
 
@@ -236,7 +230,7 @@ const hasTeamAndProject = Boolean(teamId && projectId);
 
         expect(result.issueDelete.success).toBe(true);
       } else {
-        fail("No issue IDs available for deletion test");
+        fail('No issue IDs available for deletion test');
       }
     });
   });

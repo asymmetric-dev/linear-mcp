@@ -11,6 +11,7 @@ The Linear MCP provides a type-safe, modular interface to the Linear API. It abs
 ### Domain-Driven Design
 
 The codebase is organized around business domains:
+
 - Authentication
 - Issues
 - Projects
@@ -18,6 +19,7 @@ The codebase is organized around business domains:
 - Users
 
 Each domain has its own set of:
+
 - Handlers (for MCP tool operations)
 - Types
 - Tests
@@ -121,21 +123,21 @@ The GraphQL layer provides domain-specific operations with atomic and composite 
 class LinearGraphQLClient {
   // Execute GraphQL operations
   async execute<T>(document: DocumentNode, variables?: any): Promise<T>;
-  
+
   // Atomic operations
   async createProject(input: ProjectInput): Promise<ProjectResponse>;
   async createBatchIssues(issues: CreateIssueInput[]): Promise<IssueBatchResponse>;
-  
+
   // Composite operations (built from atomic operations)
   async createProjectWithIssues(
-    projectInput: ProjectInput, 
+    projectInput: ProjectInput,
     issues: CreateIssueInput[]
   ): Promise<ProjectResponse> {
     // Creates project first, then creates issues with project reference
     const project = await this.createProject(projectInput);
-    const issuesWithProject = issues.map(issue => ({
+    const issuesWithProject = issues.map((issue) => ({
       ...issue,
-      projectId: project.projectCreate.project.id
+      projectId: project.projectCreate.project.id,
     }));
     const batchResult = await this.createBatchIssues(issuesWithProject);
     return { projectCreate: project.projectCreate, issueBatchCreate: batchResult.issueBatchCreate };
@@ -144,6 +146,7 @@ class LinearGraphQLClient {
 ```
 
 This pattern ensures:
+
 - Clear separation between atomic and composite operations
 - Type safety through the entire operation chain
 - Proper error handling at each step
@@ -169,16 +172,19 @@ interface ErrorToolResponse extends BaseToolResponse {
 ## Best Practices
 
 1. **Handler Organization**
+
    - Each domain has its own handler
    - Handlers extend BaseHandler
    - Keep handler methods focused and single-purpose
 
 2. **Type Safety**
+
    - Define tool schemas in tool.types.ts
    - Use interfaces for handler methods
    - Minimize use of 'any' type
 
 3. **Error Handling**
+
    - Use BaseHandler error methods
    - Provide clear error messages
    - Include operation context in errors
@@ -191,6 +197,7 @@ interface ErrorToolResponse extends BaseToolResponse {
 ## Planned Improvements
 
 ### Type Safety & Validation
+
 - Replace all 'any' types with proper interfaces
 - Generate types from GraphQL schema
 - Add runtime type checking
@@ -198,6 +205,7 @@ interface ErrorToolResponse extends BaseToolResponse {
 - Improve error messages for validation failures
 
 ### Performance Optimizations
+
 - Implement true batch mutations for bulk operations
 - Pre-import and cache GraphQL operations
 - Add query batching for related operations
@@ -206,6 +214,7 @@ interface ErrorToolResponse extends BaseToolResponse {
 - Add operation validation
 
 ### Handler Enhancements
+
 - Add comprehensive input validation
 - Implement response caching with invalidation
 - Add retry logic with backoff strategy
@@ -213,6 +222,7 @@ interface ErrorToolResponse extends BaseToolResponse {
 - Improve error context and debugging
 
 ### OAuth Implementation
+
 - Complete OAuth flow with proper state management
 - Add token refresh with automatic retry
 - Implement secure token storage
@@ -220,6 +230,7 @@ interface ErrorToolResponse extends BaseToolResponse {
 - Support multiple OAuth scopes
 
 ### GraphQL Operations
+
 - Implement true batching for bulk operations
 - Move to code generation for type safety
 - Add operation validation and optimization
@@ -227,7 +238,9 @@ interface ErrorToolResponse extends BaseToolResponse {
 - Add query complexity analysis
 
 ### Authentication Refactoring
+
 - Split authentication into separate implementations:
+
   ```typescript
   interface ILinearAuth {
     initialize(config: AuthConfig): void;
@@ -245,7 +258,9 @@ interface ErrorToolResponse extends BaseToolResponse {
   ```
 
 ### Caching Layer
+
 - Implement caching for frequently accessed data:
+
   ```typescript
   interface CacheConfig {
     ttl: number;
@@ -254,7 +269,7 @@ interface ErrorToolResponse extends BaseToolResponse {
 
   class CacheManager {
     private cache: Map<string, CacheEntry>;
-    
+
     get<T>(key: string): T | undefined;
     set<T>(key: string, value: T, ttl?: number): void;
     invalidate(pattern: string): void;
@@ -262,7 +277,9 @@ interface ErrorToolResponse extends BaseToolResponse {
   ```
 
 ### Rate Limiting
+
 - Add rate limiting middleware:
+
   ```typescript
   class RateLimiter {
     private readonly limits: Map<string, number>;
@@ -274,6 +291,7 @@ interface ErrorToolResponse extends BaseToolResponse {
   ```
 
 ### Error Handling
+
 - Implement domain-specific error types:
   ```typescript
   class LinearApiError extends Error {
