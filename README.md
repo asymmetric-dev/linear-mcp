@@ -1,6 +1,7 @@
 # Linear MCP Server
 
 An MCP server for interacting with Linear's API. This server provides a set of tools for managing Linear issues, projects, and teams through Cline.
+> **Note:** This is a fork of the [cline/linear-mcp](https://github.com/cline/linear-mcp). This fork aims to continue development and fix outstanding issues.
 
 ## Setup Guide
 
@@ -109,7 +110,7 @@ The server currently supports the following operations:
 
 - ✅ Create issues with full field support (title, description, team, project, etc.)
 - ✅ Update existing issues (priority, description, etc.)
-- ✅ Delete issues (single or bulk deletion)
+- ✅ Delete issue
 - ✅ Search issues with filtering
 - ✅ Associate issues with projects
 - ✅ Create parent/child issue relationships
@@ -119,6 +120,7 @@ The server currently supports the following operations:
 - ✅ Create projects with associated issues
 - ✅ Get project information
 - ✅ Associate issues with projects
+- ✅ Search projects
 
 ### Team Management
 
@@ -133,11 +135,7 @@ The server currently supports the following operations:
 ### Batch Operations
 
 - ✅ Bulk issue creation
-- ✅ Bulk issue deletion
-
-### Bulk Updates (In Testing)
-
-- 🚧 Bulk issue updates (parallel processing implemented, needs testing)
+- ✅ Bulk issue update
 
 ## Features in Development
 
