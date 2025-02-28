@@ -49,7 +49,7 @@ export interface IssueLabelsResponse {
   };
 }
 
-export interface LabelInput {
+export interface IssueLabelCreateInput {
   name: string;
   color?: string;
   teamId: string;

@@ -86,7 +86,7 @@ export interface ProjectResponse {
 }
 
 export interface SearchProjectsResponse {
-  projects: {
+  searchProjects: {
     nodes: Array<Project>;
   };
 }

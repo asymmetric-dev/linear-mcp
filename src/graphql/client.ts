@@ -20,7 +20,7 @@ import {
 import {
   IssueLabelsResponse,
   Label,
-  LabelInput,
+  IssueLabelCreateInput,
   LabelResponse,
   TeamResponse,
   WorkflowStatesResponse,
@@ -63,9 +63,9 @@ export class LinearGraphQLClient {
   }
 
   // Create label
-  async createIssueLabel(label: LabelInput): Promise<LabelResponse> {
+  async createIssueLabel(label: IssueLabelCreateInput): Promise<LabelResponse> {
     const { CREATE_ISSUE_LABELS } = await import('./mutations.js');
-    return this.execute<LabelResponse>(CREATE_ISSUE_LABELS, { label });
+    return this.execute<LabelResponse>(CREATE_ISSUE_LABELS, { input: label });
   }
 
   // create or get agent label with caching
@@ -84,7 +84,7 @@ export class LinearGraphQLClient {
       this.agentLabelCache.set(teamId, label);
       return label;
     } else {
-      const labelInput: LabelInput = {
+      const labelInput: IssueLabelCreateInput = {
         name: labelName,
         teamId,
         description: 'Automation',

@@ -17,7 +17,7 @@ import {
   // ProjectResponse, - Not used directly
   // SearchProjectsResponse, - Not used directly
 } from '../features/projects/types/project.types';
-import { TeamResponse, LabelInput, LabelResponse } from '../features/teams/types/team.types';
+import { TeamResponse, IssueLabelCreateInput, LabelResponse } from '../features/teams/types/team.types';
 import { UserResponse } from '../features/users/types/user.types';
 
 jest.mock('@linear/sdk');
@@ -564,7 +564,7 @@ describe('LinearGraphQLClient', () => {
 
       mockRawRequest.mockResolvedValueOnce(mockResponse);
 
-      const labelInput: LabelInput = {
+      const labelInput: IssueLabelCreateInput = {
         name: 'bug',
         color: '#FF0000',
         teamId: 'team-1',
@@ -579,7 +579,7 @@ describe('LinearGraphQLClient', () => {
     it('should handle label creation errors', async () => {
       mockRawRequest.mockRejectedValueOnce(new Error('Label creation failed'));
 
-      const labelInput: LabelInput = {
+      const labelInput: IssueLabelCreateInput = {
         name: 'bug',
         teamId: 'team-1',
       };
