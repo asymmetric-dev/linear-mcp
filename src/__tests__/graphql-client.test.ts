@@ -1,24 +1,22 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { LinearGraphQLClient } from '../graphql/client';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { LinearClient } from '@linear/sdk';
 import {
   CreateIssueInput,
   CreateIssueResponse,
-  // CreateIssuesResponse, - Not used directly
-  UpdateIssueInput,
-  UpdateIssuesResponse,
+  IssueBatchResponse,
   SearchIssuesInput,
   SearchIssuesResponse,
-  // DeleteIssueResponse, - Not used directly
-  IssueBatchResponse,
+  UpdateIssueInput,
+  UpdateIssuesResponse,
 } from '../features/issues/types/issue.types';
+import { ProjectInput } from '../features/projects/types/project.types';
 import {
-  ProjectInput,
-  // ProjectResponse, - Not used directly
-  // SearchProjectsResponse, - Not used directly
-} from '../features/projects/types/project.types';
-import { TeamResponse, IssueLabelCreateInput, LabelResponse } from '../features/teams/types/team.types';
+  IssueLabelCreateInput,
+  LabelResponse,
+  TeamResponse,
+} from '../features/teams/types/team.types';
 import { UserResponse } from '../features/users/types/user.types';
+import { LinearGraphQLClient } from '../graphql/client';
 
 jest.mock('@linear/sdk');
 

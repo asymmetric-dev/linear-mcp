@@ -18,9 +18,9 @@ import {
   SearchProjectsResponse,
 } from '../features/projects/types/project.types.js';
 import {
+  IssueLabelCreateInput,
   IssueLabelsResponse,
   Label,
-  IssueLabelCreateInput,
   LabelResponse,
   TeamResponse,
   WorkflowStatesResponse,
@@ -69,13 +69,14 @@ export class LinearGraphQLClient {
   }
 
   // create or get agent label with caching
-  async createOrGetAgentLabel(teamId: string): Promise<Label> {
-    const cachedLabel = this.agentLabelCache.get(teamId);
-    if (cachedLabel) {
-      return cachedLabel;
+  async createOrGetAgentLabel(teamId: string, forceRefresh = false): Promise<Label> {
+    if (!forceRefresh) {
+      const cachedLabel = this.agentLabelCache.get(teamId);
+      if (cachedLabel) {
+        return cachedLabel;
+      }
     }
 
-    // If not in cache, do the original logic
     const labels = await this.getLabels(true);
     const label = labels.issueLabels.nodes.find((label) => label.name === labelName);
 
@@ -100,7 +101,7 @@ export class LinearGraphQLClient {
 
   // Create single issue
   async createIssue(input: CreateIssueInput): Promise<CreateIssueResponse> {
-    const label = await this.createOrGetAgentLabel(input.teamId);
+    const label = await this.createOrGetAgentLabel(input.teamId, false);
     input.labelIds = [...(input.labelIds ?? []), label.id];
     const { CREATE_ISSUE_MUTATION } = await import('./mutations.js');
     return this.execute<CreateIssueResponse>(CREATE_ISSUE_MUTATION, { input: input });
@@ -110,7 +111,7 @@ export class LinearGraphQLClient {
   async createIssues(issues: CreateIssueInput[]): Promise<IssueBatchResponse> {
     await Promise.all(
       issues.map(async (issue) => {
-        const label = await this.createOrGetAgentLabel(issue.teamId);
+        const label = await this.createOrGetAgentLabel(issue.teamId, false);
         issue.labelIds = [...(issue.labelIds ?? []), label.id];
       })
     );

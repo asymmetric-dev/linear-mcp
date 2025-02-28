@@ -72,10 +72,10 @@ const projectId = _projectId ? _projectId : '';
   // Project Operations tests - only run if we have team and project IDs
   (hasTeamAndProject ? describe : describe.skip)('Project Operations', () => {
     let testProjectId: string;
-    let testProjectName: string;
+    const testProjectName = `Zen Test Project ${new Date().toISOString()}`;
+    const testProjectTerm = 'Zen Test project';
 
     it('should create a new project', async () => {
-      testProjectName = `Test Project ${new Date().toISOString()}`;
       const projectInput: ProjectInput = {
         name: testProjectName,
         teamIds: [teamId],
@@ -102,7 +102,7 @@ const projectId = _projectId ? _projectId : '';
     });
 
     it('should search for projects by name', async () => {
-      const result = await linearClient.searchProjects(testProjectName);
+      const result = await linearClient.searchProjects(testProjectTerm);
 
       expect(result).toBeDefined();
       expect(result.searchProjects).toBeDefined();
@@ -208,6 +208,26 @@ const projectId = _projectId ? _projectId : '';
       expect(result.issues).toBeDefined();
       expect(Array.isArray(result.issues.nodes)).toBe(true);
       expect(result.issues.pageInfo).toBeDefined();
+    });
+
+    it('should search for issues by ids', async () => {
+      const result = await linearClient.searchIssues(
+        { ids: createdIssueIds },
+        10,
+        undefined,
+        'createdAt'
+      );
+
+      expect(result).toBeDefined();
+      expect(result.issues).toBeDefined();
+      expect(result.issues.nodes.length).toEqual(createdIssueIds.length);
+    });
+
+    it('should agent label exists', async () => {
+      const result = await linearClient.createOrGetAgentLabel(teamId, true);
+
+      expect(result).toBeDefined();
+      expect(result.name).toBeDefined();
     });
 
     it('should delete an issue', async () => {
