@@ -34,6 +34,7 @@ export class HandlerFactory {
     method: string;
   } {
     // Map tool names to their handlers and methods
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handlerMap: Record<string, { handler: any; method: string }> = {
       // Auth tools
       linear_auth: { handler: this.authHandler, method: 'handleAuth' },
@@ -56,6 +57,8 @@ export class HandlerFactory {
 
       // Team tools
       linear_get_teams: { handler: this.teamHandler, method: 'handleGetTeams' },
+      linear_get_states: { handler: this.teamHandler, method: 'handleGetStates' },
+      linear_get_labels: { handler: this.teamHandler, method: 'handleGetLabels' },
 
       // User tools
       linear_get_user: { handler: this.userHandler, method: 'handleGetUser' },

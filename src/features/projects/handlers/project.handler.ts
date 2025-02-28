@@ -33,6 +33,7 @@ export class ProjectHandler extends BaseHandler {
    * });
    * ```
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async handleCreateProjectWithIssues(args: any): Promise<BaseToolResponse> {
     try {
       const client = this.verifyAuth();
@@ -65,6 +66,7 @@ export class ProjectHandler extends BaseHandler {
       }
 
       // Validate each issue has required teamId
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args.issues.forEach((issue: any, index: number) => {
         if (!issue.teamId) {
           throw new Error(
@@ -109,13 +111,12 @@ export class ProjectHandler extends BaseHandler {
   /**
    * Gets information about a specific project.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async handleGetProject(args: any): Promise<BaseToolResponse> {
     try {
       const client = this.verifyAuth();
       this.validateRequiredParams(args, ['id']);
-
       const result = await client.getProject(args.id);
-
       return this.createJsonResponse(result);
     } catch (error) {
       this.handleError(error, 'get project info');
@@ -125,15 +126,12 @@ export class ProjectHandler extends BaseHandler {
   /**
    * Searches for projects by name.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async handleSearchProjects(args: any): Promise<BaseToolResponse> {
     try {
       const client = this.verifyAuth();
-      this.validateRequiredParams(args, ['name']);
-
-      const result = await client.searchProjects({
-        name: { eq: args.name },
-      });
-
+      this.validateRequiredParams(args, ['term']);
+      const result = await client.searchProjects(args.term);
       return this.createJsonResponse(result);
     } catch (error) {
       this.handleError(error, 'search projects');

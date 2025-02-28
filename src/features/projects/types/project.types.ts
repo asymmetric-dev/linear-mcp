@@ -38,12 +38,23 @@ export interface Team {
   name: string;
 }
 
+export interface Issue {
+  id: string;
+  title: string;
+  updatedAt: Date;
+  createdAt: Date;
+  state: { name: string };
+  assignee?: { id: string; name: string };
+  labels?: { nodes: Array<{ name: string }> };
+}
+
 export interface Project {
   id: string;
   name: string;
   description: string;
   url: string;
   teams: { nodes: Team[] };
+  issues: { nodes: Issue[] };
 }
 
 export interface GetProjectResponse {
@@ -75,7 +86,7 @@ export interface ProjectResponse {
 }
 
 export interface SearchProjectsResponse {
-  projects: {
+  searchProjects: {
     nodes: Array<Project>;
   };
 }

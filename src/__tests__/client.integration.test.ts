@@ -14,12 +14,15 @@ let linearClient: LinearGraphQLClient;
 
 // Get environment variables directly or from env setup
 const LINEAR_ACCESS_TOKEN = process.env.LINEAR_ACCESS_TOKEN;
-const teamId = process.env.TEAMID;
-const projectId = process.env.PROJECTID;
+const _teamId = process.env.TEAMID;
+const _projectId = process.env.PROJECTID;
 
 // Check if we can run tests
 const hasAuth = Boolean(LINEAR_ACCESS_TOKEN);
-const hasTeamAndProject = Boolean(teamId && projectId);
+const hasTeamAndProject = Boolean(_teamId && _projectId);
+
+const teamId = _teamId ? _teamId : '';
+const projectId = _projectId ? _projectId : '';
 
 // Only run tests if we have authentication
 (hasAuth ? describe : describe.skip)('Linear API Client Integration', () => {
@@ -69,13 +72,13 @@ const hasTeamAndProject = Boolean(teamId && projectId);
   // Project Operations tests - only run if we have team and project IDs
   (hasTeamAndProject ? describe : describe.skip)('Project Operations', () => {
     let testProjectId: string;
-    let testProjectName: string;
+    const testProjectName = `Zen Test Project ${new Date().toISOString()}`;
+    const testProjectTerm = 'Zen Test project';
 
     it('should create a new project', async () => {
-      testProjectName = `Test Project ${new Date().toISOString()}`;
       const projectInput: ProjectInput = {
         name: testProjectName,
-        teamIds: [teamId!],
+        teamIds: [teamId],
         description: 'This is a test project created for Jest integration tests',
       };
 
@@ -99,15 +102,13 @@ const hasTeamAndProject = Boolean(teamId && projectId);
     });
 
     it('should search for projects by name', async () => {
-      const result = await linearClient.searchProjects({
-        name: { eq: testProjectName },
-      });
+      const result = await linearClient.searchProjects(testProjectTerm);
 
       expect(result).toBeDefined();
-      expect(result.projects).toBeDefined();
-      expect(Array.isArray(result.projects.nodes)).toBe(true);
-      expect(result.projects.nodes.length).toBeGreaterThan(0);
-      expect(result.projects.nodes[0].name).toBe(testProjectName);
+      expect(result.searchProjects).toBeDefined();
+      expect(Array.isArray(result.searchProjects.nodes)).toBe(true);
+      expect(result.searchProjects.nodes.length).toBeGreaterThan(0);
+      expect(result.searchProjects.nodes[0].name).toBe(testProjectName);
     });
   });
 
@@ -120,8 +121,8 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       const issueInput: CreateIssueInput = {
         title: `Test issue created at ${new Date().toISOString()}`,
         description: 'This is a test issue created by Jest integration tests',
-        teamId: teamId!,
-        projectId: projectId!,
+        teamId: teamId,
+        projectId: projectId,
         priority: 2,
       };
 
@@ -130,16 +131,15 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       expect(result.issueCreate.success).toBe(true);
       expect(result.issueCreate.issue).toBeDefined();
 
-      // @ts-ignore: Object is possibly 'null' or 'undefined'
-      expect(result.issueCreate.issue.id).toBeDefined();
-      // @ts-ignore: Object is possibly 'null' or 'undefined'
-      expect(result.issueCreate.issue.identifier).toBeDefined();
-      // @ts-ignore: Object is possibly 'null' or 'undefined'
-      expect(result.issueCreate.issue.title).toBe(issueInput.title);
+      expect(result.issueCreate.issue?.id).toBeDefined();
+      expect(result.issueCreate.issue?.identifier).toBeDefined();
+      expect(result.issueCreate.issue?.title).toBe(issueInput.title);
 
       // Non-null assertion operator tells TypeScript we know this isn't null
-      singleIssueId = result.issueCreate.issue!.id;
-      createdIssueIds.push(singleIssueId);
+      if (result.issueCreate.issue) {
+        singleIssueId = result.issueCreate.issue?.id;
+        createdIssueIds.push(singleIssueId);
+      }
     });
 
     it('should create multiple issues in bulk', async () => {
@@ -147,15 +147,15 @@ const hasTeamAndProject = Boolean(teamId && projectId);
         {
           title: `Bulk test issue 1 (${new Date().toISOString()})`,
           description: 'This is bulk test issue 1',
-          teamId: teamId!,
-          projectId: projectId!,
+          teamId: teamId,
+          projectId: projectId,
           priority: 1,
         },
         {
           title: `Bulk test issue 2 (${new Date().toISOString()})`,
           description: 'This is bulk test issue 2',
-          teamId: teamId!,
-          projectId: projectId!,
+          teamId: teamId,
+          projectId: projectId,
           priority: 3,
         },
       ];
@@ -166,15 +166,10 @@ const hasTeamAndProject = Boolean(teamId && projectId);
       expect(Array.isArray(result.issueBatchCreate.issues)).toBe(true);
       expect(result.issueBatchCreate.issues.length).toBe(bulkIssues.length);
 
-      // @ts-ignore: Object is possibly 'null' or 'undefined'
       result.issueBatchCreate.issues.forEach((issue, index) => {
-        // @ts-ignore: Object is possibly 'null' or 'undefined'
         expect(issue.id).toBeDefined();
-        // @ts-ignore: Object is possibly 'null' or 'undefined'
         expect(issue.title).toBe(bulkIssues[index].title);
-        // @ts-ignore: Object is possibly 'null' or 'undefined'
         bulkIssueIds.push(issue.id);
-        // @ts-ignore: Object is possibly 'null' or 'undefined'
         createdIssueIds.push(issue.id);
       });
     });
@@ -190,7 +185,6 @@ const hasTeamAndProject = Boolean(teamId && projectId);
 
       expect(result.issueUpdate.success).toBe(true);
       expect(result.issueUpdate.issue).toBeDefined();
-      // @ts-ignore: Object is possibly 'null' or 'undefined'
       expect(result.issueUpdate.issue.title).toBe(updateInput.title);
     });
 
@@ -208,8 +202,17 @@ const hasTeamAndProject = Boolean(teamId && projectId);
     });
 
     it('should search for issues in a project', async () => {
+      const result = await linearClient.searchIssues({ projectId }, 10, undefined, 'createdAt');
+
+      expect(result).toBeDefined();
+      expect(result.issues).toBeDefined();
+      expect(Array.isArray(result.issues.nodes)).toBe(true);
+      expect(result.issues.pageInfo).toBeDefined();
+    });
+
+    it('should search for issues by ids', async () => {
       const result = await linearClient.searchIssues(
-        { project: { id: { eq: projectId } } },
+        { ids: createdIssueIds },
         10,
         undefined,
         'createdAt'
@@ -217,8 +220,14 @@ const hasTeamAndProject = Boolean(teamId && projectId);
 
       expect(result).toBeDefined();
       expect(result.issues).toBeDefined();
-      expect(Array.isArray(result.issues.nodes)).toBe(true);
-      expect(result.issues.pageInfo).toBeDefined();
+      expect(result.issues.nodes.length).toEqual(createdIssueIds.length);
+    });
+
+    it('should agent label exists', async () => {
+      const result = await linearClient.createOrGetAgentLabel(teamId, true);
+
+      expect(result).toBeDefined();
+      expect(result.name).toBeDefined();
     });
 
     it('should delete an issue', async () => {

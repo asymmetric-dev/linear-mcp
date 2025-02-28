@@ -100,13 +100,16 @@ export const DELETE_ISSUES_MUTATION = gql`
 `;
 
 export const CREATE_ISSUE_LABELS = gql`
-  mutation CreateIssueLabels($labels: [IssueLabelCreateInput!]!) {
-    issueLabelCreate(input: $labels) {
+  mutation IssueLabelCreate($input: IssueLabelCreateInput!) {
+    issueLabelCreate(input: $input) {
       success
-      issueLabels {
+      issueLabel {
         id
         name
-        color
+        team {
+          id
+          name
+        }
       }
     }
   }

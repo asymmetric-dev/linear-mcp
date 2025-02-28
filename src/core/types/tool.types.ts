@@ -44,7 +44,8 @@ export const toolSchemas = {
 
   linear_create_issue: {
     name: 'linear_create_issue',
-    description: 'Create a new issue in Linear',
+    description: `Create a new issue in Linear. You must know the state ids (use getStates) to 
+create an issue with state, and when it is not mentioned, default state must be backlog`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -80,6 +81,14 @@ export const toolSchemas = {
           description: 'Issue State ID',
           optional: true,
         },
+        labelIds: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description: 'Label IDs to apply',
+          optional: true,
+        },
         createAsUser: {
           type: 'string',
           description: 'Name to display for the created issue',
@@ -95,10 +104,215 @@ export const toolSchemas = {
     },
   },
 
+  linear_create_issues: {
+    name: 'linear_create_issues',
+    description: `Create multiple issues at once You must know the state ids 
+(use getStates) to create an issue with state, and when it is not mentioned, 
+default state must be backlog`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        issues: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              title: {
+                type: 'string',
+                description: 'Issue title',
+              },
+              description: {
+                type: 'string',
+                description: 'Issue description',
+              },
+              teamId: {
+                type: 'string',
+                description: 'Team ID',
+              },
+              assigneeId: {
+                type: 'string',
+                description: 'Assignee user ID',
+                optional: true,
+              },
+              priority: {
+                type: 'number',
+                description: 'Issue priority (0-4)',
+                optional: true,
+              },
+              projectId: {
+                type: 'string',
+                description: 'Project ID',
+                optional: true,
+              },
+              stateId: {
+                type: 'string',
+                description: 'Issue State ID',
+                optional: true,
+              },
+              labelIds: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+                description: 'Label IDs to apply',
+                optional: true,
+              },
+            },
+            required: ['title', 'description', 'teamId'],
+          },
+          description: 'List of issues to create',
+        },
+      },
+      required: ['issues'],
+    },
+  },
+
+  linear_bulk_update_issues: {
+    name: 'linear_bulk_update_issues',
+    description: 'Update multiple issues at once',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        issueIds: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description: 'List of issue IDs to update',
+        },
+        update: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'Issue title',
+            },
+            description: {
+              type: 'string',
+              description: 'Issue description',
+            },
+            assigneeId: {
+              type: 'string',
+              description: 'New assignee ID',
+              optional: true,
+            },
+            priority: {
+              type: 'number',
+              description: 'New priority (0-4)',
+              optional: true,
+            },
+            stateId: {
+              type: 'string',
+              description: 'New state ID',
+              optional: true,
+            },
+          },
+        },
+      },
+      required: ['issueIds', 'update'],
+    },
+  },
+
+  linear_search_issues: {
+    name: 'linear_search_issues',
+    description: 'Search for issues with filtering and pagination',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Search query string',
+          optional: true,
+        },
+        ids: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description: 'Filter by issue IDs',
+          optional: true,
+        },
+        projectId: {
+          type: 'string',
+          description: 'Filter by project id',
+          optional: true,
+        },
+        teamIds: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description: 'Filter by team IDs',
+          optional: true,
+        },
+        assigneeIds: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description: 'Filter by assignee IDs',
+          optional: true,
+        },
+        stateIds: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description: 'Filter by state ids',
+          optional: true,
+        },
+        labelIds: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description: 'Filter by label ids',
+          optional: true,
+        },
+        priority: {
+          type: 'number',
+          description: 'Filter by priority (0-4)',
+          optional: true,
+        },
+        first: {
+          type: 'number',
+          description: 'Number of issues to return (default: 50)',
+          optional: true,
+        },
+        after: {
+          type: 'string',
+          description: 'Cursor for pagination',
+          optional: true,
+        },
+        orderBy: {
+          type: 'string',
+          description: 'Field to order by (default: updatedAt)',
+          optional: true,
+        },
+      },
+    },
+  },
+
+  linear_delete_issue: {
+    name: 'linear_delete_issue',
+    description: 'Delete an issue',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          description: 'Issue identifier (e.g., ENG-123)',
+        },
+      },
+      required: ['id'],
+    },
+  },
+
   linear_create_project_with_issues: {
     name: 'linear_create_project_with_issues',
-    description:
-      'Create a new project with associated issues. Note: Project requires teamIds (array) not teamId (single value).',
+    description: `Create a new project with associated issues. Note: Project requires 
+teamIds (array) not teamId (single value) You must know the state ids (use getStates) to 
+create an issue with state, and when it is not mentioned, default state must be backlog`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -141,6 +355,24 @@ export const toolSchemas = {
               teamId: {
                 type: 'string',
                 description: 'Team ID (must match one of the project teamIds)',
+              },
+              assigneeId: {
+                type: 'string',
+                description: 'Assignee user ID',
+                optional: true,
+              },
+              priority: {
+                type: 'number',
+                description: 'Issue priority (0-4)',
+                optional: true,
+              },
+              labelIds: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+                description: 'Label IDs to apply',
+                optional: true,
               },
               stateId: {
                 type: 'string',
@@ -198,136 +430,6 @@ export const toolSchemas = {
     ],
   },
 
-  linear_bulk_update_issues: {
-    name: 'linear_bulk_update_issues',
-    description: 'Update multiple issues at once',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        issueIds: {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-          description: 'List of issue IDs to update',
-        },
-        update: {
-          type: 'object',
-          properties: {
-            stateId: {
-              type: 'string',
-              description: 'New state ID',
-              optional: true,
-            },
-            assigneeId: {
-              type: 'string',
-              description: 'New assignee ID',
-              optional: true,
-            },
-            priority: {
-              type: 'number',
-              description: 'New priority (0-4)',
-              optional: true,
-            },
-          },
-        },
-      },
-      required: ['issueIds', 'update'],
-    },
-  },
-
-  linear_search_issues: {
-    name: 'linear_search_issues',
-    description: 'Search for issues with filtering and pagination',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        query: {
-          type: 'string',
-          description: 'Search query string',
-          optional: true,
-        },
-        teamIds: {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-          description: 'Filter by team IDs',
-          optional: true,
-        },
-        assigneeIds: {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-          description: 'Filter by assignee IDs',
-          optional: true,
-        },
-        states: {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-          description: 'Filter by state names',
-          optional: true,
-        },
-        priority: {
-          type: 'number',
-          description: 'Filter by priority (0-4)',
-          optional: true,
-        },
-        first: {
-          type: 'number',
-          description: 'Number of issues to return (default: 50)',
-          optional: true,
-        },
-        after: {
-          type: 'string',
-          description: 'Cursor for pagination',
-          optional: true,
-        },
-        orderBy: {
-          type: 'string',
-          description: 'Field to order by (default: updatedAt)',
-          optional: true,
-        },
-      },
-    },
-  },
-
-  linear_get_teams: {
-    name: 'linear_get_teams',
-    description: 'Get all teams with their states and labels',
-    inputSchema: {
-      type: 'object',
-      properties: {},
-    },
-  },
-
-  linear_get_user: {
-    name: 'linear_get_user',
-    description: 'Get current user information',
-    inputSchema: {
-      type: 'object',
-      properties: {},
-    },
-  },
-
-  linear_delete_issue: {
-    name: 'linear_delete_issue',
-    description: 'Delete an issue',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          description: 'Issue identifier (e.g., ENG-123)',
-        },
-      },
-      required: ['id'],
-    },
-  },
-
   linear_get_project: {
     name: 'linear_get_project',
     description: 'Get project information',
@@ -345,77 +447,64 @@ export const toolSchemas = {
 
   linear_search_projects: {
     name: 'linear_search_projects',
-    description: 'Search for projects by name',
+    description: 'Search for projects by term',
     inputSchema: {
       type: 'object',
       properties: {
-        name: {
+        term: {
           type: 'string',
-          description: 'Project name to search for (exact match)',
+          description: 'Term to search projects',
         },
       },
-      required: ['name'],
+      required: ['term'],
     },
   },
 
-  linear_create_issues: {
-    name: 'linear_create_issues',
-    description: 'Create multiple issues at once',
+  linear_get_teams: {
+    name: 'linear_get_teams',
+    description: 'Get all teams with their states and labels',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+
+  linear_get_states: {
+    name: 'linear_get_states',
+    description: 'Get Linear all states',
     inputSchema: {
       type: 'object',
       properties: {
-        issues: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              title: {
-                type: 'string',
-                description: 'Issue title',
-              },
-              description: {
-                type: 'string',
-                description: 'Issue description',
-              },
-              teamId: {
-                type: 'string',
-                description: 'Team ID',
-              },
-              assigneeId: {
-                type: 'string',
-                description: 'Assignee user ID',
-                optional: true,
-              },
-              priority: {
-                type: 'number',
-                description: 'Issue priority (0-4)',
-                optional: true,
-              },
-              projectId: {
-                type: 'string',
-                description: 'Project ID',
-                optional: true,
-              },
-              stateId: {
-                type: 'string',
-                description: 'Issue State ID',
-                optional: true,
-              },
-              labelIds: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                },
-                description: 'Label IDs to apply',
-                optional: true,
-              },
-            },
-            required: ['title', 'description', 'teamId'],
-          },
-          description: 'List of issues to create',
+        forceRefresh: {
+          type: 'boolean',
+          description: 'Refresh the cached valued, only set if user wants to get new data',
         },
       },
-      required: ['issues'],
+      required: [],
+    },
+  },
+
+  linear_get_labels: {
+    name: 'linear_get_labels',
+    description: 'Get Linear all labels',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        forceRefresh: {
+          type: 'boolean',
+          description: 'Refresh the cached valued, only set if user wants to get new data',
+        },
+      },
+      required: [],
+    },
+  },
+
+  linear_get_user: {
+    name: 'linear_get_user',
+    description: 'Get current user information',
+    inputSchema: {
+      type: 'object',
+      properties: {},
     },
   },
 };

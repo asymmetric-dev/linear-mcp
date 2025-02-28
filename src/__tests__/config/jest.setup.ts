@@ -3,6 +3,8 @@ import { jest } from '@jest/globals';
 // import type { LinearClient } from '@linear/sdk';
 // import type { LinearGraphQLClient } from '../../graphql/client';
 import { config } from 'dotenv';
+import { Label } from '../../features/teams/types/team.types';
+import { Team } from '../../features/projects/types/project.types';
 
 // Load environment variables from .env file
 config();
@@ -33,11 +35,26 @@ config();
 // Client shape defined inline where used
 
 // Create mock client factory function
+
+const team: Team = { id: 'team-1', name: 'teamA' };
+const label: Label = {
+  id: 'label-1',
+  name: 'Label One',
+  team: team,
+};
+const agentLabelCache = new Map([['teamA', label]]);
+const cache = {
+  states: {},
+  labels: {},
+};
+
 const createMockClient = () => ({
   client: {
     rawRequest: jest.fn().mockImplementation(async () => ({ data: {} })),
   },
   viewer: Promise.resolve({ id: 'test-user', name: 'Test User' }),
+  _agentLabelCache: agentLabelCache,
+  _cache: cache,
 });
 
 // Create mock constructor that creates new instances

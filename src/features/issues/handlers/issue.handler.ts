@@ -121,29 +121,8 @@ export class IssueHandler extends BaseHandler implements IssueHandlerMethods {
     try {
       const client = this.verifyAuth();
 
-      const filter: Record<string, unknown> = {};
-
-      if (args.query) {
-        filter.search = args.query;
-      }
-      if (args.filter?.project?.id?.eq) {
-        filter.project = { id: { eq: args.filter.project.id.eq } };
-      }
-      if (args.teamIds) {
-        filter.team = { id: { in: args.teamIds } };
-      }
-      if (args.assigneeIds) {
-        filter.assignee = { id: { in: args.assigneeIds } };
-      }
-      if (args.states) {
-        filter.state = { name: { in: args.states } };
-      }
-      if (typeof args.priority === 'number') {
-        filter.priority = { eq: args.priority };
-      }
-
       const result = (await client.searchIssues(
-        filter,
+        args,
         args.first || 50,
         args.after,
         args.orderBy || 'updatedAt'

@@ -1,24 +1,22 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { LinearGraphQLClient } from '../graphql/client';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { LinearClient } from '@linear/sdk';
 import {
   CreateIssueInput,
   CreateIssueResponse,
-  // CreateIssuesResponse, - Not used directly
-  UpdateIssueInput,
-  UpdateIssuesResponse,
+  IssueBatchResponse,
   SearchIssuesInput,
   SearchIssuesResponse,
-  // DeleteIssueResponse, - Not used directly
-  IssueBatchResponse,
+  UpdateIssueInput,
+  UpdateIssuesResponse,
 } from '../features/issues/types/issue.types';
+import { ProjectInput } from '../features/projects/types/project.types';
 import {
-  ProjectInput,
-  // ProjectResponse, - Not used directly
-  // SearchProjectsResponse, - Not used directly
-} from '../features/projects/types/project.types';
-import { TeamResponse, LabelInput, LabelResponse } from '../features/teams/types/team.types';
+  IssueLabelCreateInput,
+  LabelResponse,
+  TeamResponse,
+} from '../features/teams/types/team.types';
 import { UserResponse } from '../features/users/types/user.types';
+import { LinearGraphQLClient } from '../graphql/client';
 
 jest.mock('@linear/sdk');
 
@@ -27,7 +25,7 @@ type GraphQLResponse<T> = {
   data: T;
 };
 
-describe.only('LinearGraphQLClient', () => {
+describe('LinearGraphQLClient', () => {
   let graphqlClient: LinearGraphQLClient;
   let linearClient: LinearClient;
   let mockRawRequest: jest.MockedFunction<
@@ -73,18 +71,12 @@ describe.only('LinearGraphQLClient', () => {
       mockRawRequest.mockResolvedValueOnce(mockResponse);
 
       const searchInput: SearchIssuesInput = {
-        filter: {
-          project: {
-            id: {
-              eq: 'project-1',
-            },
-          },
-        },
+        projectId: 'project-1',
         first: 1,
       };
 
       const result: SearchIssuesResponse = await graphqlClient.searchIssues(
-        searchInput.filter,
+        searchInput,
         searchInput.first
       );
 
@@ -96,16 +88,10 @@ describe.only('LinearGraphQLClient', () => {
       mockRawRequest.mockRejectedValueOnce(new Error('Search failed'));
 
       const searchInput: SearchIssuesInput = {
-        filter: {
-          project: {
-            id: {
-              eq: 'project-1',
-            },
-          },
-        },
+        projectId: 'project-1',
       };
 
-      await expect(graphqlClient.searchIssues(searchInput.filter)).rejects.toThrow(
+      await expect(graphqlClient.searchIssues(searchInput)).rejects.toThrow(
         'GraphQL operation failed: Search failed'
       );
     });
@@ -113,7 +99,26 @@ describe.only('LinearGraphQLClient', () => {
 
   describe('createIssue', () => {
     it('should successfully create an issue', async () => {
-      const mockResponse = {
+      // Mock response for label creation (first API call)
+      const mockLabelResponse = {
+        data: {
+          issueLabels: {
+            nodes: [
+              {
+                id: 'label-1',
+                name: 'agent',
+                team: {
+                  id: 'team-1',
+                  name: 'team A',
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      // Mock response for issue creation (second API call)
+      const mockIssueResponse = {
         data: {
           issueCreate: {
             success: true,
@@ -127,7 +132,10 @@ describe.only('LinearGraphQLClient', () => {
         },
       };
 
-      mockRawRequest.mockResolvedValueOnce(mockResponse);
+      // Setup sequential mock responses
+      mockRawRequest
+        .mockResolvedValueOnce(mockLabelResponse)
+        .mockResolvedValueOnce(mockIssueResponse);
 
       const input: CreateIssueInput = {
         title: 'New Issue',
@@ -137,7 +145,7 @@ describe.only('LinearGraphQLClient', () => {
 
       const result: CreateIssueResponse = await graphqlClient.createIssue(input);
 
-      // Verify single mutation call with array input
+      // Verify the issue creation call
       expect(mockRawRequest).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
@@ -145,8 +153,11 @@ describe.only('LinearGraphQLClient', () => {
         })
       );
 
-      expect(result).toEqual(mockResponse.data);
-      expect(mockRawRequest).toHaveBeenCalled();
+      // Verify both API calls happened
+      expect(mockRawRequest).toHaveBeenCalledTimes(2);
+
+      // Verify result is the issue creation response
+      expect(result).toEqual(mockIssueResponse.data);
     });
 
     it('should handle creation errors', async () => {
@@ -367,7 +378,27 @@ describe.only('LinearGraphQLClient', () => {
         },
       };
 
-      mockRawRequest.mockResolvedValueOnce(mockResponse);
+      const mockLabelResponse = {
+        data: {
+          issueLabels: {
+            nodes: [
+              {
+                id: 'label-1',
+                name: 'agent',
+                team: {
+                  id: 'team-1',
+                  name: 'team A',
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      mockRawRequest
+        .mockResolvedValueOnce(mockLabelResponse)
+        .mockResolvedValueOnce(mockLabelResponse)
+        .mockResolvedValueOnce(mockResponse);
 
       const issues: CreateIssueInput[] = [
         {
@@ -386,7 +417,7 @@ describe.only('LinearGraphQLClient', () => {
 
       expect(result).toEqual(mockResponse.data);
       // Verify single mutation call
-      expect(mockRawRequest).toHaveBeenCalledTimes(1);
+      expect(mockRawRequest).toHaveBeenCalledTimes(3);
       expect(mockRawRequest).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
@@ -531,13 +562,13 @@ describe.only('LinearGraphQLClient', () => {
 
       mockRawRequest.mockResolvedValueOnce(mockResponse);
 
-      const labelInput: LabelInput = {
+      const labelInput: IssueLabelCreateInput = {
         name: 'bug',
         color: '#FF0000',
         teamId: 'team-1',
       };
 
-      const result: LabelResponse = await graphqlClient.createIssueLabels([labelInput]);
+      const result: LabelResponse = await graphqlClient.createIssueLabel(labelInput);
 
       expect(result).toEqual(mockResponse.data);
       expect(mockRawRequest).toHaveBeenCalled();
@@ -546,12 +577,12 @@ describe.only('LinearGraphQLClient', () => {
     it('should handle label creation errors', async () => {
       mockRawRequest.mockRejectedValueOnce(new Error('Label creation failed'));
 
-      const labelInput: LabelInput = {
+      const labelInput: IssueLabelCreateInput = {
         name: 'bug',
         teamId: 'team-1',
       };
 
-      await expect(graphqlClient.createIssueLabels([labelInput])).rejects.toThrow(
+      await expect(graphqlClient.createIssueLabel(labelInput)).rejects.toThrow(
         'GraphQL operation failed: Label creation failed'
       );
     });

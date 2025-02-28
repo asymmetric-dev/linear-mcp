@@ -70,7 +70,7 @@ class LinearServer {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       try {
         const { handler, method } = this.handlerFactory.getHandlerForTool(request.params.name);
-        // Use type assertion to handle dynamic method access
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return await (handler as any)[method](request.params.arguments);
       } catch (error) {
         if (error instanceof Error && error.message.startsWith('No handler found')) {

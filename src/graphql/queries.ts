@@ -81,6 +81,49 @@ export const GET_TEAMS_QUERY = gql`
   }
 `;
 
+export const GET_WORKFLOW_STATES_QUERY = gql`
+  query WorkflowStates {
+    workflowStates {
+      nodes {
+        id
+        name
+        team {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+export const GET_ISSUE_LABELS_QUERY = gql`
+  query IssueLabels {
+    issueLabels {
+      nodes {
+        id
+        name
+        team {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+export const GET_ISSUE_LABEL_QUERY = gql`
+  query IssueLabel($id: String!) {
+    issueLabel(id: $id) {
+      id
+      name
+      team {
+        id
+        name
+      }
+    }
+  }
+`;
+
 export const GET_USER_QUERY = gql`
   query GetUser {
     viewer {
@@ -99,8 +142,8 @@ export const GET_USER_QUERY = gql`
 `;
 
 export const SEARCH_PROJECTS_QUERY = gql`
-  query SearchProjects($filter: ProjectFilter) {
-    projects(filter: $filter) {
+  query SearchProjects($term: String!) {
+    searchProjects(term: $term) {
       nodes {
         id
         name
@@ -128,6 +171,26 @@ export const GET_PROJECT_QUERY = gql`
         nodes {
           id
           name
+        }
+      }
+      issues {
+        nodes {
+          id
+          title
+          updatedAt
+          createdAt
+          state {
+            name
+          }
+          assignee {
+            id
+            name
+          }
+          labels {
+            nodes {
+              name
+            }
+          }
         }
       }
     }
